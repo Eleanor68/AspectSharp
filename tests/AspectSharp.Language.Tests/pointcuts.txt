@@ -1,0 +1,67 @@
+﻿public static * Namespace.Class.* - all public static members
+public instance * Namespace.Class.* - all public instance members
+public * Namespace.Class.* - all public members
+
+int Namespace.Class.(Property) - points to public Property get/set
+int Namespace.Class.*.get - all public get accessors
+int get(Namesapce.Class.*)
+
+int Namespace.Class.*.set - all public set accessors
+int set(Namesapce.Class.*) 
+
+int Namesapce.Class.Property.get - points only to get accessor of propert Property
+int get(Namesapce.Class.Property)
+int get(*.*)
+
+int Namesapce.Class.Property.set - points only to set accessor of propert Property
+int set(Namesapce.Class.Property)
+
+Long form:
++ member(*,*)
++ member(Namespace, *)
++ member(Namespace, Class)
++ member(Namespace.., *)
+
++ class(Namespace.., *)
++ class(*, class_name)
+
++ within(Namespace.Class)
++ within(Namespace..)
++ within(namespace(namespace_name))
++ within(class(*, class_name))
+
++ namespace(Namespace).class(*).member(*)
+
+public Namespace.*.new		- all public constructors for all classes from Namespace
+public Namespace.Class.ctor		- all public constructors
+public Namespace.Class.new(..)	- all public constructors
+public Namespace.Class.ctor(..)	- all public constructors
+public Namespace.Class.new()	- default constructor
+public Namespace.Class.ctor()	- default constructor
+public Namespace.Class.new(int)		- cast constructor
++ Namespace.Class.ctor(int)	- cast constructor
+
+
+public void Namespace.Class.(*,*)
+public void Namespace.Class.Dispose()
+
+* *.(*,*)
+
+call(*.new()) && within(Namespace.*ss)
++ (Namesapce1.Class1 || Namespace2.Class2 || Class3).new()
+*.new() && within(Namesapce1.Class1 || Namespace2.Class2 || Class3)
+
+within(Namespace-token)
+
+<w> := ['a'-'z']+
+<W> := ['A'-'Z']+
+<d> := ['0'-'9']+
+
+<string-token> := (w | W | '_')+ (w | W | d | '_')+
+
+<name-token> := string-token | ('*' string-token) | (string-token '*') | ('*' string-token '*')
+<namespace-token> := (name-token '..') | (name-token+ '.')
+<class-token> := (())* 
+
+{name of the namespace} DOT DOT
+{name of th}

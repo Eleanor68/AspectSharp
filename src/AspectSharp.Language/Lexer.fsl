@@ -1,0 +1,138 @@
+﻿{
+    module AspectSharp.Language.Lexer
+
+    open System
+    open AspectSharp.Language.Parser
+    open AspectSharp.Language.Tokens
+    open Microsoft.FSharp.Text.Lexing
+    
+    let lexeme = Lexing.LexBuffer<_>.LexemeString
+    
+    let operators = [
+        ("+", PLUS);
+        ("-", MINUS);
+        ("#", HASH);
+        ("&", AND);
+        ("&&", AND);
+        ("|", OR);
+        ("!", NOT);
+        (":", COLON);
+        (";", SEMICOLON);
+        (",", COMMA);
+        ("*", TIMES);
+        (".", DOT);
+        ("(", LP);
+        (")", RP) 
+    ] |> Map.ofList
+
+    let keywords = [ 
+        ("class", CLASS);
+        ("public", PUBLIC);
+        ("private", PRIVATE);
+        ("protected", PROTECTED);
+        ("internal", INTERNAL);
+        ("instance", INSTANCE);
+        ("static", STATIC);
+        ("in", IN);
+        ("out", OUT);
+        ("ref", REF);
+        ("get", GET);
+        ("set", SET);
+        ("throw", THROW);
+        ("return", RETURN);
+        ("with", WITH);
+        ("target", TARGET);
+        ("finally", FINALLY);
+        ("before", BEFORE);
+        ("after", AFTER);
+        ("around", AROUND);
+        ("strict", STRICT);
+        ("ctor", CTOR);
+        ("exec", EXEC);
+        ("pg:", P_GET);
+        ("ps:", P_SET);
+        ("p:", P_FULL);
+        ("async", ASYNC);
+        ("arg:", ARG_EXP);
+        ("m:", METHOD_EXP);
+        ("c:", CLASS_EXP)
+    ] |> Map.ofList
+
+    let keywords_match keyword =
+        match keywords.TryFind keyword with   
+        | option.Some(x) -> x   
+        | option.None -> failwith "unknown keyword in AspectSharp.Lexer"
+
+    let operators_match operator = 
+        match operators.TryFind operator with
+        | option.Some(x) -> x
+        | option.None -> failwith "unknown operator in AspectSharp.Lexer"
+}
+
+let spaces = [' ' '\t']+
+
+let w =	['a'-'z']+
+let W =	['A'-'Z']+
+let d =	['0'-'9']+
+
+let name = (w | W | '_')+ (w | W | d | '_')+
+
+let keyword = 
+	"class" 
+	| "object"
+	| "atomic" 
+	| "barrier" 
+	| "rw"			
+	| "in" 
+	| "out" 
+	| "ref" 
+	| "get"			
+	| "set" 
+	| "throw" 
+	| "target"		
+	| "return" 
+	| "with"	
+	| "finally"	
+	| "before"		
+	| "after" 
+	| "around" 
+	| "strict"		
+	| "compatibility" 
+	| "ctor" 
+	| "exec" 
+	| "async" 
+	| "pg:" 
+	| "ps:" 
+	| "p:"
+	| "arg:" 
+	| "m:" 
+	| "c:"
+
+let operator = 
+	"+"
+	| "-"
+	| "#"
+	| "&"
+	| "&&"
+	| "|"
+	| "!"
+	| ":"
+	| ";"
+	| ","
+	| "*"
+	| "."
+	| "("
+	| ")"
+
+rule AspectLexing = parse
+| keyword		{ keywords_match (lexeme lexbuf) }
+| name			{ STRONG (lexeme lexbuf) }
+| name '*'		{ OPTIONAL (lexeme lexbuf) }
+| '*' name		{ OPTIONAL (lexeme lexbuf) }
+| '*' name '*'	{ OPTIONAL (lexeme lexbuf) }
+| d				{ NUMBER (Int32.Parse (lexeme lexbuf)) }
+| operator		{ operators_match (lexeme lexbuf) }
+| spaces		{ AspectLexing lexbuf }
+| eof 
+| "$" { EOF } 
+| _ { failwithf "unrecognized input: '%s'" (lexeme lexbuf) }

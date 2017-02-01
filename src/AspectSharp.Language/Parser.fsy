@@ -1,0 +1,166 @@
+﻿%{   
+    open AspectSharp.Language.Tokens
+    open Microsoft.FSharp.Text.Lexing
+%}   
+
+%token <string> STRONG
+%token <string> OPTIONAL
+%token <int> NUMBER   
+
+%token PLUS MINUS HASH AND OR NOT COLON SEMICOLON COMMA ASTERISK DOT LP RP EOF
+
+%token CTOR CLASS OBJECT
+%token ATOMIC BARRIER RW 
+%token IN OUT REF 
+%token GET SET
+%token BEFORE AFTER AROUND
+%token STRICT EXEC ASYNC
+%token WITH TARGET FINALLY THROW RETURN
+
+%left COLON COMMA STRONG
+%left OPTIONAL
+%left CTOR GET SET FULL TIMES
+
+// start   
+%start START   
+%type <PoincutExpr> START   
+ 
+%%
+ 
+START: Advice Targets Options { { advice = $1; targets = List.rev $2; options = $3 } }
+
+// ================ advice processing ================ 
+
+Advice: 
+| BEFORE { Before(option.None) }
+| AROUND { Around(option.None) }
+| AFTER	AfterOption	{ After(option.None, $2) }
+| BEFORE AdviceOption				{ Before(Some($2)) }
+| AROUND AdviceOption				{ Around(Some($2)) }
+| AFTER	AdviceOption AfterOption	{ After(Some($2), $3) }
+
+AfterOption:
+| THROW			{ Throw }
+| RETURN		{ Return }
+| FINALLY		{ Finally }
+| PLUS THROW	{ Throw }
+| PLUS RETURN	{ Return }
+| PLUS FINALLY	{ Finally }
+
+AdviceOption:
+| TARGET		{ WithTarget }
+| WITH TARGET	{ WithTarget }
+| PLUS TARGET	{ WithTarget }
+
+// ================ advice processing ================ 
+
+// ================ target processing ================
+
+Targets:
+| Target					{ [$1] }
+| Target SEMI				{ [$1] }
+| LP Target RP				{ [$2] }
+| Target SEMI Targets		{ $1 :: $3 }
+| Target AND Targets		{ $1 :: $3 }
+| LP Target RP AND Targets	{ $2 :: $5 }
+| LP Target RP SEMI Targets { $2 :: $5 }
+
+ArgumentOption: 
+| IN  { In }
+| OUT { Out }
+| REF { Ref } 
+
+Argument: 
+| StrongClass { (option.None, $1) }
+| ArgumentOption StrongClass { (Some($1), $2) }
+
+ArgumentList:
+| Argument { [$1] }
+| Argument COMMA ArgumentList { $1 :: $3 }
+
+Args:
+| LP RP					{ [] }
+| LP ArgumentList RP	{ List.rev $2 }
+| ARG_EXP ArgumentList	{ $2 }  
+
+Class: 
+| OPTIONAL		{ Class.MakeFromString $1 } 
+| StrongClass	{ $1 }
+| StrongNames DOT OPTIONAL { Class.MakeFromStrings (List.rev ( $3 :: $1 )) }
+
+StrongClass: StrongNames { Class.MakeFromStrings (List.rev $1) }
+
+StrongNames:
+| STRONG	{ [$1] }
+| STRONG DOT StrongNames { $1 :: $3 }
+
+Target:
+| Constructor	{ $1 }
+| Method		{ $1 }
+| Property		{ $1 }
+
+Constructor:
+| Class X CTOR Args		{ Ctor($1, $4) }
+
+Method:
+| Class X OPTIONAL Args	{ Method($1, Name.Parse $3 , $4) }  
+| Class X STRONG   Args	{ Method($1, Name.Parse $3 , $4) }
+
+Property: 
+| Class X OPTIONAL PropertyType	{ Property($1, Name.Parse $3, $4) }  
+| Class X STRONG PropertyType	{ Property($1, Name.Parse $3, $4) }  
+| Class PropertyTypeExtended  OPTIONAL	{ Property($1, Name.Parse $3, $2) }  
+| Class PropertyTypeExtended  STRONG	{ Property($1, Name.Parse $3, $2) }  
+
+PropertyType:
+| DOT GET 	{ Get }
+| DOT SET 	{ Set }
+| DOT PLUS 	{ Full }
+| PLUS GET 	{ Get }
+| PLUS SET 	{ Set }
+| PLUS PLUS { Full }
+| WITH GET 	{ Get }
+| WITH SET 	{ Set }
+| WITH PLUS { Full }
+
+PropertyTypeExtended:
+| P_GET	 	{ Get }
+| P_SET	 	{ Set }
+| P_FULL	{ Full }
+
+// ================ target processing ================
+
+// ================ option processing ================
+
+Options: AdviceCreation SignatureMatch Concurrency Exec 
+{ { creation = $1; signature = $2; concurrency = $3; exec = $4 } }
+
+AdviceCreation:
+|		 { AdviceCreation.None }
+| CLASS  { Class }
+| OBJECT { Object }
+
+SignatureMatch:
+|				{ SignatureMatch.None }
+| OBSERVER      { Observer }
+| STRICT		{ Strict }
+| COMPATIBILITY	{ Compatibility }
+
+Concurrency:
+|		  { Concurrency.None }
+| ATOMIC  { Atomic(option.None) }
+| BARRIER { Barrier(option.None) }
+| RW	  { Rw(option.None) }
+| ATOMIC	LP STRONG RP { Atomic(Some(Name.Parse $3)) }
+| BARRIER	LP STRONG RP { Barrier(Some(Name.Parse $3)) }
+| RW		LP STRONG RP { Rw(Some(Name.Parse $3)) }
+
+Exec:
+|				{ Exec.None }
+| EXEC X NUMBER	{ Order($3) }
+| EXEC X ASYNC	{ Async }
+| ASYNC			{ Async }
+
+// ================ option processing ================
+
+%%
