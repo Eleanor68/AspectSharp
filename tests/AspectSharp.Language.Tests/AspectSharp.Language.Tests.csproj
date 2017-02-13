@@ -60,6 +60,7 @@
   <ItemGroup>
     <Compile Include="LanguageLexerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SyntaxTokenFactoryTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="pointcuts.txt" />

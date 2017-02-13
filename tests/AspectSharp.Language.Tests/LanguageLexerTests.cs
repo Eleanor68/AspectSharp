@@ -1,8 +1,10 @@
 ﻿using AspectSharp.Core.SyntaxTree;
+using System.Diagnostics;
 using Xunit;
 
 namespace AspectSharp.Language.Tests
 {
+
     public class LanguageLexerTests
     {
         [Fact]
@@ -24,7 +26,19 @@ namespace AspectSharp.Language.Tests
             var token = lexer.GetNextToken();
 
             Assert.NotNull(token);
-            Assert.Equal(SyntaxTokenKind.Identifier, token.TokenKind);
+            Assert.Equal(SyntaxTokenKind.Public, token.TokenKind);
         }
+
+        /*[Fact]
+        public void DisplayCharMarks()
+        {
+            var i = 0;
+            foreach (var c in LanguageLexer.charMarkers)
+            {
+                Trace.WriteLine($"[{i}] = `{(char)i}` - {(LanguageLexer.CharMark)c}");
+                i++;
+            }
+        }*/
+
     }
 }

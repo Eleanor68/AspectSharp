@@ -1,85 +1,11 @@
 using System;
-using System.Runtime.InteropServices;
 
 namespace AspectSharp.Core.SyntaxTree
 {
-    public class LanguageText
-    {
-        private readonly string text;
-
-        public LanguageText(string text)
-        {
-            if (string.IsNullOrEmpty(text)) throw new ArgumentException(nameof(text));
-
-            this.text = text;
-        }
-
-        public char Peek()
-        {
-            return text[Offset];
-        }
-
-        public void Advance(int count)
-        {
-            Offset += count;
-
-            if (Offset >= CharacterCount) Offset = CharacterCount;
-        }
-
-        public int CharacterCount => text.Length;
-
-        public int Offset { get; private set; }
-
-        public char this[int index]
-        {
-            get
-            {
-                return index >= CharacterCount ? '\0' : text[index];
-            }
-        }
-    }
-
-    public class SyntaxToken
-    {
-        public string IdentifierText { get; set; }
-
-        public SyntaxTokenKind TokenKind { get; set; }
-    }
-
-    /// <remarks>
-    /// We want to share immutable tokens.
-    /// </remarks>
-    public static class SyntaxTokenFactory
-    {
-        public static SyntaxToken MakeIdent(LanguageText text, int offset, int count)
-        {
-            //todo: check if the text is keyword and return object from cache.
-            return new SyntaxToken { TokenKind = SyntaxTokenKind.Identifier };
-        }
-
-        public static SyntaxToken MakePunct(char c)
-        {
-            //todo: check if the char is known and return object from cache.
-            switch (c)
-            {
-                case '.' : return new SyntaxToken { TokenKind = SyntaxTokenKind.Dot };
-            }
-
-            return null;
-        }
-    }
-
-    public enum SyntaxTokenKind
-    {
-        None,
-        Identifier,
-        Dot
-    }
-
     public class LanguageLexer
     {
         private enum State : byte
-        { 
+        {
             Initial = 0,
             Ident,
             IdentDone,
@@ -97,12 +23,42 @@ namespace AspectSharp.Core.SyntaxTree
             Unknown
         }
 
-        private static readonly byte[] charMarkers;
+        //Is it really faster?
+        private static readonly byte[] charMarkers = new byte[128]
+        {
+            //0..9
+            (byte)CharMark.EndOfText, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.White,
+            //10..13
+            (byte)CharMark.White, (byte)CharMark.White, (byte)CharMark.White, (byte)CharMark.White, (byte)CharMark.Unknown,
+            //14..31
+            (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown,
+            (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown,
+            //32..39
+            (byte)CharMark.White, (byte)CharMark.Punct, (byte)CharMark.Unknown, (byte)CharMark.Punct, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Punct, (byte)CharMark.Unknown,
+            //40..47
+            (byte)CharMark.Punct, (byte)CharMark.Punct, (byte)CharMark.Punct, (byte)CharMark.Punct, (byte)CharMark.Unknown, (byte)CharMark.Punct, (byte)CharMark.Punct, (byte)CharMark.Unknown,
+            //48..57
+            (byte)CharMark.Digit, (byte)CharMark.Digit, (byte)CharMark.Digit, (byte)CharMark.Digit, (byte)CharMark.Digit, (byte)CharMark.Digit, (byte)CharMark.Digit, (byte)CharMark.Digit, (byte)CharMark.Digit, (byte)CharMark.Digit,
+            //58..64
+            (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown,
+            //65..90
+            (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter,
+            (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter,
+            (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter,
+            //91..96
+            (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Letter, (byte)CharMark.Unknown,
+            //97..122
+            (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter,
+            (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter,
+            (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter, (byte)CharMark.Letter,
+            //123..127
+            (byte)CharMark.Unknown, (byte)CharMark.Punct, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown
+        };
 
-        private static byte[,] transitions = new byte[,] 
+        private static byte[,] transitions = new byte[,]
         {
             //Initial
-            {   
+            {
                 (byte)State.Ident,      //Letter
                 (byte)State.Bad,        //Digit
                 (byte)State.PunctDone,  //Punct
@@ -123,7 +79,7 @@ namespace AspectSharp.Core.SyntaxTree
 
         private LanguageText languageText;
 
-        static LanguageLexer()
+        /*static LanguageLexer()
         {
             charMarkers = new byte[255];
             for (var i = 0; i < charMarkers.Length; i++)
@@ -133,7 +89,7 @@ namespace AspectSharp.Core.SyntaxTree
 
             charMarkers[0] = (byte)CharMark.EndOfText;
 
-            for (var i = (byte)'A'; i <= (byte)'Z' ; i++)
+            for (var i = (byte)'A'; i <= (byte)'Z'; i++)
             {
                 charMarkers[i] = (byte)CharMark.Letter;
                 charMarkers[i + 32] = (byte)CharMark.Letter;
@@ -152,7 +108,7 @@ namespace AspectSharp.Core.SyntaxTree
             charMarkers[(byte)'\t'] = (byte)CharMark.White;
 
             charMarkers[(byte)'.'] = (byte)CharMark.Punct;
-        }
+        }*/
 
 
         public LanguageLexer(LanguageText languageText)
@@ -177,6 +133,8 @@ namespace AspectSharp.Core.SyntaxTree
                 if (state >= State.IdentDone) break;
             }
 
+            languageText.Advance(i);
+
             if (state == State.IdentDone)
             {
                 return SyntaxTokenFactory.MakeIdent(languageText, lexemeStart, i - lexemeStart);
@@ -184,8 +142,6 @@ namespace AspectSharp.Core.SyntaxTree
 
             if (state == State.PunctDone)
             {
-                languageText.Advance(i);
-
                 return SyntaxTokenFactory.MakePunct(languageText.Peek());
             }
 
