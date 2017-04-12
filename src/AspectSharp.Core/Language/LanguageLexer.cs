@@ -1,6 +1,6 @@
 using System;
 
-namespace AspectSharp.Core.SyntaxTree
+namespace AspectSharp.Core.Language
 {
     public class LanguageLexer
     {
@@ -8,7 +8,9 @@ namespace AspectSharp.Core.SyntaxTree
         {
             Initial = 0,
             Ident,
+            White,
             IdentDone,
+            WhiteDone,
             PunctDone,
             Bad
         }
@@ -55,14 +57,14 @@ namespace AspectSharp.Core.SyntaxTree
             (byte)CharMark.Unknown, (byte)CharMark.Punct, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Unknown
         };
 
-        private static byte[,] transitions = new byte[,]
+        private static readonly byte[,] transitions = 
         {
             //Initial
             {
                 (byte)State.Ident,      //Letter
                 (byte)State.Bad,        //Digit
                 (byte)State.PunctDone,  //Punct
-                (byte)State.Initial,    //White
+                (byte)State.White,      //White
                 (byte)State.Bad,        //EndOfText
                 (byte)State.Bad         //Unknown
             },
@@ -73,6 +75,15 @@ namespace AspectSharp.Core.SyntaxTree
                 (byte)State.IdentDone,  //Punct
                 (byte)State.IdentDone,  //White
                 (byte)State.IdentDone,  //EndOfText
+                (byte)State.Bad         //Unknown
+            },
+            //White
+            {
+                (byte)State.WhiteDone,  //Letter
+                (byte)State.WhiteDone,  //Digit
+                (byte)State.WhiteDone,  //Punct
+                (byte)State.White,      //White
+                (byte)State.WhiteDone,  //EndOfText
                 (byte)State.Bad         //Unknown
             },
         };
@@ -119,30 +130,49 @@ namespace AspectSharp.Core.SyntaxTree
         public SyntaxToken GetNextToken()
         {
             var state = State.Initial;
-            var n = languageText.CharacterCount;
-            int i = languageText.Offset, lexemeStart = i;
+            int n = languageText.Length, i = languageText.Offset, lexemeStart = i;
 
-            for (; i <= n; i++)
+            if (i >= n)
             {
-                var c = languageText[i];
+                return SyntaxTokenFactory.MakePunct('\0');
+            }
+
+            do
+            {
+                char c = '\0';
+
+                if (i < n)
+                {
+                    c = languageText[i];
+                }
 
                 var charMark = charMarkers[(byte)c];
 
                 state = (State)transitions[(byte)state, charMark];
 
                 if (state >= State.IdentDone) break;
-            }
 
-            languageText.Advance(i);
+                i++;
+
+            } while (i <= n);
 
             if (state == State.IdentDone)
             {
+                languageText.Advance(i - lexemeStart);
                 return SyntaxTokenFactory.MakeIdent(languageText, lexemeStart, i - lexemeStart);
             }
 
             if (state == State.PunctDone)
             {
-                return SyntaxTokenFactory.MakePunct(languageText.Peek());
+                var p = languageText.Peek();
+                languageText.Advance(1);
+                return SyntaxTokenFactory.MakePunct(p);
+            }
+
+            if (state == State.WhiteDone)
+            {
+                languageText.Advance(i - lexemeStart);
+                return SyntaxTokenFactory.MakeWhite();
             }
 
             return null;

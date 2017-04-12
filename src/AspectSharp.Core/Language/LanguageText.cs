@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 
-namespace AspectSharp.Core.SyntaxTree
+namespace AspectSharp.Core.Language
 {
     public class LanguageText
     {
@@ -15,17 +16,17 @@ namespace AspectSharp.Core.SyntaxTree
 
         public char Peek()
         {
-            return text[Offset];
+            return this[Offset];
         }
 
         public void Advance(int count)
         {
             Offset += count;
 
-            if (Offset >= CharacterCount) Offset = CharacterCount;
+            if (Offset >= Length) Offset = Length;
         }
 
-        public int CharacterCount => text.Length;
+        public int Length => text.Length;
 
         public int Offset { get; private set; }
 
@@ -33,7 +34,7 @@ namespace AspectSharp.Core.SyntaxTree
         {
             get
             {
-                return index >= CharacterCount ? '\0' : text[index];
+                return index >= Length ? '\0' : text[index];
             }
         }
 

@@ -1,7 +1,8 @@
-﻿namespace AspectSharp.Core.SyntaxTree
+﻿namespace AspectSharp.Core.Language
 {
     public enum AccessibilityToken  
     {
+        Any,
         Public,
         Private,
         Protected,

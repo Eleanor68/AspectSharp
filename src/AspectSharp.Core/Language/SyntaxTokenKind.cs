@@ -1,8 +1,9 @@
-﻿namespace AspectSharp.Core.SyntaxTree
+﻿namespace AspectSharp.Core.Language
 {
     public enum SyntaxTokenKind
     {
         None,
+
         Identifier,
         Dot,
         Not,
@@ -15,5 +16,17 @@
         And,
         Or,
         Public,
+        Private,
+        Protected,
+        Internal,
+        Instance,
+        Static,
+        Class,
+        Ctor,
+        GetProperty,
+        SetProperty,
+
+        White,
+        EndOfText
     }
 }
