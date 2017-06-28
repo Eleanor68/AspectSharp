@@ -16,6 +16,8 @@ namespace AspectSharp.Core.Language
     {
         public AccessibilityToken Accessibility { get; internal set; }
 
+        public MemberScopeToken MemberScope { get; set; }
+
         public TypeReference Type { get; private set; }
 
         public TypeReference ReturnType { get; set; }
@@ -43,7 +45,13 @@ namespace AspectSharp.Core.Language
             Lex();
 
             var accessibility = ParseAccessibility();
-            return new PointcutDefinition { Accessibility = accessibility };
+            var memberScope = ParseMemberScope();
+
+            return new PointcutDefinition
+            {
+                Accessibility = accessibility,
+                MemberScope = memberScope
+            };
         }
 
         private void Lex()
@@ -65,10 +73,7 @@ namespace AspectSharp.Core.Language
         private AccessibilityToken ParseAccessibility()
         {
             var token = CurrentToken;
-            if (token == null)
-            {
-                //TODO: bad token
-            }
+            CheckCurrentToken(token);
 
             AccessibilityToken accessibility;
 
@@ -110,5 +115,32 @@ namespace AspectSharp.Core.Language
             AdvanceToken(1);
             return accessibility;
         }
+
+        private MemberScopeToken ParseMemberScope()
+        {
+            var token = CurrentToken;
+            CheckCurrentToken(token);
+
+            switch (token.TokenKind)
+            {
+                case SyntaxTokenKind.Instance:
+                    AdvanceToken(1);
+                    return MemberScopeToken.Instance;
+                case SyntaxTokenKind.Static:
+                    AdvanceToken(1);
+                    return MemberScopeToken.Static;
+                default:
+                    return MemberScopeToken.Any;
+            }
+        }
+
+        private static void CheckCurrentToken(SyntaxToken token)
+        {
+            if (token == null)
+            {
+                //TODO: bad token
+            }
+        }
+
     }
 }
