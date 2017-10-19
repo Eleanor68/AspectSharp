@@ -2,10 +2,10 @@
 
 namespace AspectSharp.Core.Language
 {
-    [DebuggerDisplay("Kind={TokenKind} Text='{IdentifierText}'")]
+    [DebuggerDisplay("Kind={TokenKind} Text='{ValueText}'")]
     public class SyntaxToken
     {
-        public string IdentifierText { get; set; }
+        public string ValueText { get; set; }
 
         public SyntaxTokenKind TokenKind { get; set; }
     }

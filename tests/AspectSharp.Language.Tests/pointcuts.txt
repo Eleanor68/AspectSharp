@@ -32,20 +32,32 @@ Long form:
 
 + namespace(Namespace).class(*).member(*)
 
-public Namespace.*.new		- all public constructors for all classes from Namespace
-public Namespace.Class.ctor		- all public constructors
-public Namespace.Class.new(..)	- all public constructors
-public Namespace.Class.ctor(..)	- all public constructors
-public Namespace.Class.new()	- default constructor
-public Namespace.Class.ctor()	- default constructor
-public Namespace.Class.new(int)		- cast constructor
-+ Namespace.Class.ctor(int)	- cast constructor
+Constructors:
+<constructor-token> := accessibility-token member-scope-token? qualified-name-token argument-list
+<constructor-token> := accessibility-token member-scope-token? qualified-name-token '.' (new-keyword | ctor-keyword) argument-list?
+
+Form-1:
+public Namespace.Class(..)	    - all public constructors from Namespace.Class
+public Namespace.Class()	    - default constructor only from Namespace.Class
+public Namespace.Class(int)	    - cast constructor only from Namespace.Class
+public Namespace.*.(new|ctor)	- all public constructors for all classes from namespace Namespace
+
+Form-2:
+public Namespace.Class.(new|ctor)		- all public constructors from Namespace.Class
+public Namespace.Class.(new|ctor)(..)	- all public constructors from Namespace.Class
+public Namespace.Class.(new|ctor)()	    - default constructor only from Namespace.Class
+public Namespace.Class.(new|ctor)(int)	- cast constructor only from Namespace.Class
+public Namespace.*.(new|ctor)		    - all public constructors for all classes from namespace Namespace
+
+Examples:
+public static AspectSharp.Skeletons.AllInOne.new() - public static constructor from class AllInOne from namespace AspectSharp.Skeletons
+public static AspectSharp.Skeletons.AllInOne()
 
 
 public void Namespace.Class.(*,*)
 public void Namespace.Class.Dispose()
 
-* *.(*,*)
+* *.*(*)
 
 call(*.new()) && within(Namespace.*ss)
 + (Namesapce1.Class1 || Namespace2.Class2 || Class3).new()
@@ -57,9 +69,8 @@ within(Namespace-token)
 <W> := ['A'-'Z']+
 <d> := ['0'-'9']+
 
-<string-token> := (w | W | '_')+ (w | W | d | '_')+
-
-<name-token> := string-token | ('*' string-token) | (string-token '*') | ('*' string-token '*')
+<identifier-token> := (w | W | '_')+ (w | W | d | '_')+
+<identifier2-token> := string-token | ('*' string-token) | (string-token '*') | ('*' string-token '*') | '*'
 <namespace-token> := (name-token '..') | (name-token+ '.')
 <class-token> := (())* 
 

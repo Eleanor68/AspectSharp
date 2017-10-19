@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AspectSharp.Language", "AspectSharp.Language\AspectSharp.Language.fsproj", "{90D25268-6019-45C0-8542-81F2F3A412E3}"
 EndProject
@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{B047766D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectSharp.Language.Tests", "..\tests\AspectSharp.Language.Tests\AspectSharp.Language.Tests.csproj", "{FC4929C5-2E9B-49FE-8131-605121A5AEBB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectSharp.Core", "AspectSharp.Core\AspectSharp.Core.csproj", "{3B0B2F14-D00C-4569-B390-DD2B5FC1F551}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectSharp.Core", "AspectSharp.Core\AspectSharp.Core.csproj", "{3B0B2F14-D00C-4569-B390-DD2B5FC1F551}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,7 +18,6 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{90D25268-6019-45C0-8542-81F2F3A412E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{90D25268-6019-45C0-8542-81F2F3A412E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{90D25268-6019-45C0-8542-81F2F3A412E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{90D25268-6019-45C0-8542-81F2F3A412E3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FC4929C5-2E9B-49FE-8131-605121A5AEBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -35,5 +34,8 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{FC4929C5-2E9B-49FE-8131-605121A5AEBB} = {B047766D-D7D6-4B07-A222-D7BCF5AC293B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {193429E8-8CDD-456C-8418-DC0DD0B5A3CE}
 	EndGlobalSection
 EndGlobal

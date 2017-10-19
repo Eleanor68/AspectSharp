@@ -5,31 +5,31 @@
     /// </remarks>
     public static class SyntaxTokenFactory
     {
-        private static readonly SyntaxToken Dot = new SyntaxToken { TokenKind = SyntaxTokenKind.Dot, IdentifierText = "." };
-        private static readonly SyntaxToken Not = new SyntaxToken { TokenKind = SyntaxTokenKind.Not, IdentifierText = "!" };
-        private static readonly SyntaxToken LeftP = new SyntaxToken { TokenKind = SyntaxTokenKind.LeftP, IdentifierText = "(" };
-        private static readonly SyntaxToken RightP = new SyntaxToken { TokenKind = SyntaxTokenKind.RightP, IdentifierText = ")" };
-        private static readonly SyntaxToken Plus = new SyntaxToken { TokenKind = SyntaxTokenKind.Plus, IdentifierText = "+" };
-        private static readonly SyntaxToken Minus = new SyntaxToken { TokenKind = SyntaxTokenKind.Minus, IdentifierText = "-" };
-        private static readonly SyntaxToken Times = new SyntaxToken { TokenKind = SyntaxTokenKind.Times, IdentifierText = "*" };
-        private static readonly SyntaxToken Hash = new SyntaxToken { TokenKind = SyntaxTokenKind.Hash, IdentifierText = "#" };
-        private static readonly SyntaxToken And = new SyntaxToken { TokenKind = SyntaxTokenKind.And, IdentifierText = "&" };
-        private static readonly SyntaxToken Or = new SyntaxToken { TokenKind = SyntaxTokenKind.Or, IdentifierText = "|" };
+        private static readonly SyntaxToken Dot = new SyntaxToken { TokenKind = SyntaxTokenKind.Dot, ValueText = "." };
+        private static readonly SyntaxToken Not = new SyntaxToken { TokenKind = SyntaxTokenKind.Not, ValueText = "!" };
+        private static readonly SyntaxToken LeftP = new SyntaxToken { TokenKind = SyntaxTokenKind.LeftP, ValueText = "(" };
+        private static readonly SyntaxToken RightP = new SyntaxToken { TokenKind = SyntaxTokenKind.RightP, ValueText = ")" };
+        private static readonly SyntaxToken Plus = new SyntaxToken { TokenKind = SyntaxTokenKind.Plus, ValueText = "+" };
+        private static readonly SyntaxToken Minus = new SyntaxToken { TokenKind = SyntaxTokenKind.Minus, ValueText = "-" };
+        private static readonly SyntaxToken Times = new SyntaxToken { TokenKind = SyntaxTokenKind.Times, ValueText = "*" };
+        private static readonly SyntaxToken Hash = new SyntaxToken { TokenKind = SyntaxTokenKind.Hash, ValueText = "#" };
+        private static readonly SyntaxToken And = new SyntaxToken { TokenKind = SyntaxTokenKind.And, ValueText = "&" };
+        private static readonly SyntaxToken Or = new SyntaxToken { TokenKind = SyntaxTokenKind.Or, ValueText = "|" };
         private static readonly SyntaxToken EndOfText = new SyntaxToken { TokenKind = SyntaxTokenKind.EndOfText };
-        private static readonly SyntaxToken White = new SyntaxToken { TokenKind = SyntaxTokenKind.White, IdentifierText = " " };
+        private static readonly SyntaxToken White = new SyntaxToken { TokenKind = SyntaxTokenKind.White, ValueText = " " };
 
         private static readonly SyntaxToken[] Keywords = new []
         {
-            new SyntaxToken { TokenKind = SyntaxTokenKind.Public, IdentifierText = "public" },
-            new SyntaxToken { TokenKind = SyntaxTokenKind.Private, IdentifierText = "private" },
-            new SyntaxToken { TokenKind = SyntaxTokenKind.Protected, IdentifierText = "protected" },
-            new SyntaxToken { TokenKind = SyntaxTokenKind.Internal, IdentifierText = "internal" },
-            new SyntaxToken { TokenKind = SyntaxTokenKind.Instance, IdentifierText = "instance" },
-            new SyntaxToken { TokenKind = SyntaxTokenKind.Static, IdentifierText = "static" },
-            new SyntaxToken { TokenKind = SyntaxTokenKind.Class, IdentifierText = "class" },
-            new SyntaxToken { TokenKind = SyntaxTokenKind.Ctor, IdentifierText = "ctor" },
-            new SyntaxToken { TokenKind = SyntaxTokenKind.GetProperty, IdentifierText = "get" },
-            new SyntaxToken { TokenKind = SyntaxTokenKind.SetProperty, IdentifierText = "set" },
+            new SyntaxToken { TokenKind = SyntaxTokenKind.Public, ValueText = "public" },
+            new SyntaxToken { TokenKind = SyntaxTokenKind.Private, ValueText = "private" },
+            new SyntaxToken { TokenKind = SyntaxTokenKind.Protected, ValueText = "protected" },
+            new SyntaxToken { TokenKind = SyntaxTokenKind.Internal, ValueText = "internal" },
+            new SyntaxToken { TokenKind = SyntaxTokenKind.Instance, ValueText = "instance" },
+            new SyntaxToken { TokenKind = SyntaxTokenKind.Static, ValueText = "static" },
+            new SyntaxToken { TokenKind = SyntaxTokenKind.Class, ValueText = "class" },
+            new SyntaxToken { TokenKind = SyntaxTokenKind.Ctor, ValueText = "ctor" },
+            new SyntaxToken { TokenKind = SyntaxTokenKind.GetProperty, ValueText = "get" },
+            new SyntaxToken { TokenKind = SyntaxTokenKind.SetProperty, ValueText = "set" },
         };
 
         public static SyntaxToken MakeIdent(LanguageText text, int offset, int count)
@@ -41,13 +41,13 @@
             for (int i = 0; i < Keywords.Length; i++)
             {
                 var keyword = Keywords[i];
-                if (keyword.IdentifierText.Equals(lexemeText, System.StringComparison.OrdinalIgnoreCase))
+                if (keyword.ValueText.Equals(lexemeText, System.StringComparison.OrdinalIgnoreCase))
                 {
                     return keyword;
                 }
             }
 
-            return new SyntaxToken { TokenKind = SyntaxTokenKind.Identifier, IdentifierText = lexemeText };
+            return new SyntaxToken { TokenKind = SyntaxTokenKind.Identifier, ValueText = lexemeText };
         }
 
         public static SyntaxToken MakePunct(char c)

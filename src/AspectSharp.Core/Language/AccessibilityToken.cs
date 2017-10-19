@@ -9,11 +9,4 @@
         Internal,
         ProtectedInternal
     }
-
-    public enum MemberScopeToken
-    {
-        Any,
-        Instance,
-        Static
-    }
 }

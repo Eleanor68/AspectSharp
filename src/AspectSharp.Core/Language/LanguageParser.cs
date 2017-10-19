@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace AspectSharp.Core.Language
 {
-    public class TypeReference
+    public class TypeRef
     {
         public string Namespace { get; set; }
 
@@ -12,15 +13,48 @@ namespace AspectSharp.Core.Language
         public string Name { get; set; }
     }
 
-    public class PointcutDefinition
+    public enum QualifiedNameMatchType
+    {
+        Any,
+        Strict,
+        StartsWith,
+        EndsWith,
+        Contains
+    }
+
+    [DebuggerDisplay("MatchType={MatchType} Name={Name}")]
+    public class QualifiedName
+    {
+        public QualifiedNameMatchType MatchType { get; set; }
+
+        public string Name { get; set; }
+    }
+
+    public class FullyQualifiedName
+    {
+
+    }
+
+    public class PointcutDef
     {
         public AccessibilityToken Accessibility { get; internal set; }
 
         public MemberScopeToken MemberScope { get; set; }
 
-        public TypeReference Type { get; private set; }
+        public QualifiedName Type { get; set; }
 
-        public TypeReference ReturnType { get; set; }
+        public TypeRef ReturnType { get; set; }
+    }
+
+    public enum PointcutDefKind
+    {
+        Any,
+        Member,
+        Constructor,
+        Property,
+        GetProperty,
+        SetProperty,
+        //?Field
     }
 
     public class LanguageParser
@@ -31,7 +65,17 @@ namespace AspectSharp.Core.Language
 
         protected SyntaxToken CurrentToken => tokens[tokenOffset];
 
-        protected SyntaxToken PeekToken(int n = 0) => tokens[tokenOffset + n];
+        protected SyntaxToken PeekToken(int n = 0)
+        {
+            if (tokenOffset + n < tokens.Length)
+            {
+                return tokens[tokenOffset + n];
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         protected void AdvanceToken(int n = 1) => tokenOffset += n;
 
@@ -40,17 +84,19 @@ namespace AspectSharp.Core.Language
             this.lexer = lexer ?? throw new ArgumentNullException();
         }
 
-        public PointcutDefinition ParsePointcut()
+        public PointcutDef ParsePointcut()
         {
             Lex();
 
             var accessibility = ParseAccessibility();
             var memberScope = ParseMemberScope();
+            var name = ParseQualifiedName();
 
-            return new PointcutDefinition
+            return new PointcutDef
             {
                 Accessibility = accessibility,
-                MemberScope = memberScope
+                MemberScope = memberScope,
+                Type = name
             };
         }
 
@@ -73,7 +119,7 @@ namespace AspectSharp.Core.Language
         private AccessibilityToken ParseAccessibility()
         {
             var token = CurrentToken;
-            CheckCurrentToken(token);
+            CheckToken(token);
 
             AccessibilityToken accessibility;
 
@@ -119,7 +165,7 @@ namespace AspectSharp.Core.Language
         private MemberScopeToken ParseMemberScope()
         {
             var token = CurrentToken;
-            CheckCurrentToken(token);
+            CheckToken(token);
 
             switch (token.TokenKind)
             {
@@ -134,7 +180,64 @@ namespace AspectSharp.Core.Language
             }
         }
 
-        private static void CheckCurrentToken(SyntaxToken token)
+        private QualifiedName ParseQualifiedName()
+        {
+            var token = CurrentToken;
+            CheckToken(token, new[] { SyntaxTokenKind.Identifier, SyntaxTokenKind.Times });
+
+            QualifiedNameMatchType matchType;
+            string name;
+
+            switch (token.TokenKind)
+            {
+                case SyntaxTokenKind.Identifier:
+                    name = token.ValueText;
+                    token = PeekToken(1);
+                    if (token?.TokenKind == SyntaxTokenKind.Times)
+                    {
+                        AdvanceToken(2);
+                        matchType = QualifiedNameMatchType.StartsWith;
+                    }
+                    else
+                    {
+                        AdvanceToken(1);
+                        matchType = QualifiedNameMatchType.Strict;
+                    }
+                    break;
+
+                case SyntaxTokenKind.Times:
+                    token = PeekToken(1);
+                    if (token?.TokenKind == SyntaxTokenKind.Identifier)
+                    {
+                        name = token.ValueText;
+                        token = PeekToken(2);
+                        if (token?.TokenKind == SyntaxTokenKind.Times)
+                        {
+                            AdvanceToken(3);
+                            matchType = QualifiedNameMatchType.Contains;
+                        }
+                        else
+                        {
+                            AdvanceToken(2);
+                            matchType = QualifiedNameMatchType.EndsWith;
+                        }
+                    }
+                    else
+                    {
+                        AdvanceToken(2);
+                        matchType = QualifiedNameMatchType.Any;
+                        name = null;
+                    }
+                    break;
+
+                default:
+                    return null;
+            }
+
+            return new QualifiedName { MatchType = matchType, Name = name };
+        }
+
+        private static void CheckToken(SyntaxToken token, SyntaxTokenKind[] allowedTokens = null, SyntaxTokenKind[] expectedTokens = null)
         {
             if (token == null)
             {

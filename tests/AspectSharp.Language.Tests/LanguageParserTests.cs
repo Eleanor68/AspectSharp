@@ -41,5 +41,24 @@ namespace AspectSharp.Language.Tests
             Assert.NotNull(pointcut);
             Assert.Equal(pointcut.MemberScope, scope);
         }
+
+        [Theory]
+        [InlineData(QualifiedNameMatchType.Any, "public *", null)]
+        [InlineData(QualifiedNameMatchType.Strict, "public string", "string")]
+        [InlineData(QualifiedNameMatchType.EndsWith, "public *string", "string")]
+        [InlineData(QualifiedNameMatchType.StartsWith, "public string*", "string")]
+        [InlineData(QualifiedNameMatchType.Contains, "public *string*", "string")]
+        public void CheckQualifiedName(QualifiedNameMatchType matchType, string pointcutDef, string name)
+        {
+            var language = new LanguageText(pointcutDef);
+            var lexer = new LanguageLexer(language);
+            var parser = new LanguageParser(lexer);
+            var pointcut = parser.ParsePointcut();
+
+            Assert.NotNull(pointcut);
+            Assert.NotNull(pointcut.Type);
+            Assert.Equal(pointcut.Type.MatchType, matchType);
+            Assert.Equal(pointcut.Type.Name, name);
+        }
     }
 }
