@@ -1,6 +1,6 @@
 ﻿namespace AspectSharp.Core.Language
 {
-    public enum AccessibilityToken  
+    public enum MemberAccessibility  
     {
         Any,
         Public,

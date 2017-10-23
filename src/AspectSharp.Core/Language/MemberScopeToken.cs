@@ -1,6 +1,6 @@
 ﻿namespace AspectSharp.Core.Language
 {
-    public enum MemberScopeToken
+    public enum MemberScope
     {
         Any,
         Instance,

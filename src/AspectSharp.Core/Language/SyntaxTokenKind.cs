@@ -22,7 +22,7 @@
         Instance,
         Static,
         Class,
-        Ctor,
+        New,
         GetProperty,
         SetProperty,
 

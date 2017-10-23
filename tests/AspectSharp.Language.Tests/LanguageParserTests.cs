@@ -6,17 +6,17 @@ namespace AspectSharp.Language.Tests
     public class LanguageParserTests
     {
         [Theory]
-        [InlineData(AccessibilityToken.Public, "string Namespace.Class.Method()")]
-        [InlineData(AccessibilityToken.Public, "public string Namespace.Class.Method()")]
-        [InlineData(AccessibilityToken.Protected, "protected string Namespace.Class.Method()")]
-        [InlineData(AccessibilityToken.ProtectedInternal, "protected internal string Namespace.Class.Method()")]
-        [InlineData(AccessibilityToken.Private, "private string Namespace.Class.Method()")]
-        [InlineData(AccessibilityToken.Internal, "internal string Namespace.Class.Method()")]
-        [InlineData(AccessibilityToken.Public, "+ string Namespace.Class.Method()")]
-        [InlineData(AccessibilityToken.Protected, "# string Namespace.Class.Method()")]
-        [InlineData(AccessibilityToken.Private, "- string Namespace.Class.Method()")]
-        [InlineData(AccessibilityToken.Any, "* string Namespace.Class.Method()")]
-        public void CheckMethodAccessibility(AccessibilityToken accessibilityToken, string pointcutDef)
+        [InlineData(MemberAccessibility.Public, "string Namespace.Class.Method()")]
+        [InlineData(MemberAccessibility.Public, "public string Namespace.Class.Method()")]
+        [InlineData(MemberAccessibility.Protected, "protected string Namespace.Class.Method()")]
+        [InlineData(MemberAccessibility.ProtectedInternal, "protected internal string Namespace.Class.Method()")]
+        [InlineData(MemberAccessibility.Private, "private string Namespace.Class.Method()")]
+        [InlineData(MemberAccessibility.Internal, "internal string Namespace.Class.Method()")]
+        [InlineData(MemberAccessibility.Public, "+ string Namespace.Class.Method()")]
+        [InlineData(MemberAccessibility.Protected, "# string Namespace.Class.Method()")]
+        [InlineData(MemberAccessibility.Private, "- string Namespace.Class.Method()")]
+        [InlineData(MemberAccessibility.Any, "* string Namespace.Class.Method()")]
+        public void CheckMethodAccessibility(MemberAccessibility memberAccessibility, string pointcutDef)
         {
             var language = new LanguageText(pointcutDef);
             var lexer = new LanguageLexer(language);
@@ -24,14 +24,14 @@ namespace AspectSharp.Language.Tests
             var pointcut = parser.ParsePointcut();
 
             Assert.NotNull(pointcut);
-            Assert.Equal(pointcut.Accessibility, accessibilityToken);
+            Assert.Equal(pointcut.Accessibility, memberAccessibility);
         }
 
         [Theory]
-        [InlineData(MemberScopeToken.Any, "public string Namespace.Class.Method()")]
-        [InlineData(MemberScopeToken.Static, "public static string Namespace.Class.Method()")]
-        [InlineData(MemberScopeToken.Instance, "public instance string Namespace.Class.Method()")]
-        public void CheckMethodScope(MemberScopeToken scope, string pointcutDef)
+        [InlineData(MemberScope.Any, "public string Namespace.Class.Method()")]
+        [InlineData(MemberScope.Static, "public static string Namespace.Class.Method()")]
+        [InlineData(MemberScope.Instance, "public instance string Namespace.Class.Method()")]
+        public void CheckMethodScope(MemberScope scope, string pointcutDef)
         {
             var language = new LanguageText(pointcutDef);
             var lexer = new LanguageLexer(language);
@@ -39,26 +39,29 @@ namespace AspectSharp.Language.Tests
             var pointcut = parser.ParsePointcut();
 
             Assert.NotNull(pointcut);
-            Assert.Equal(pointcut.MemberScope, scope);
+            Assert.Equal(pointcut.Scope, scope);
         }
 
         [Theory]
-        [InlineData(QualifiedNameMatchType.Any, "public *", null)]
-        [InlineData(QualifiedNameMatchType.Strict, "public string", "string")]
-        [InlineData(QualifiedNameMatchType.EndsWith, "public *string", "string")]
-        [InlineData(QualifiedNameMatchType.StartsWith, "public string*", "string")]
-        [InlineData(QualifiedNameMatchType.Contains, "public *string*", "string")]
-        public void CheckQualifiedName(QualifiedNameMatchType matchType, string pointcutDef, string name)
+        [InlineData(QualifiedNameMatchType.Any, "public *.new", null)]
+        [InlineData(QualifiedNameMatchType.Any, "public *.*.new", null)]
+        [InlineData(QualifiedNameMatchType.Strict, "public string.new", "string")]
+        [InlineData(QualifiedNameMatchType.EndsWith, "public *string.new", "string")]
+        [InlineData(QualifiedNameMatchType.StartsWith, "public string*.new", "string")]
+        [InlineData(QualifiedNameMatchType.Contains, "public *string*.new", "string")]
+        public void CheckNewBasedConstructor(QualifiedNameMatchType matchType, string pointcutDef, string name)
         {
             var language = new LanguageText(pointcutDef);
             var lexer = new LanguageLexer(language);
             var parser = new LanguageParser(lexer);
             var pointcut = parser.ParsePointcut();
 
-            Assert.NotNull(pointcut);
-            Assert.NotNull(pointcut.Type);
-            Assert.Equal(pointcut.Type.MatchType, matchType);
-            Assert.Equal(pointcut.Type.Name, name);
+            var constructorPointcut = Assert.IsType<ConstructorPointcutDefinition>(pointcut);
+
+            Assert.NotNull(constructorPointcut);
+            Assert.NotNull(constructorPointcut.Type);
+            Assert.Equal(constructorPointcut.Type.Name.MatchType, matchType);
+            Assert.Equal(constructorPointcut.Type.Name.Name, name);
         }
     }
 }

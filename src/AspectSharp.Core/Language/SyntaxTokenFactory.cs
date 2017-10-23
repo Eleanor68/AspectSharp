@@ -27,7 +27,7 @@
             new SyntaxToken { TokenKind = SyntaxTokenKind.Instance, ValueText = "instance" },
             new SyntaxToken { TokenKind = SyntaxTokenKind.Static, ValueText = "static" },
             new SyntaxToken { TokenKind = SyntaxTokenKind.Class, ValueText = "class" },
-            new SyntaxToken { TokenKind = SyntaxTokenKind.Ctor, ValueText = "ctor" },
+            new SyntaxToken { TokenKind = SyntaxTokenKind.New, ValueText = "new" },
             new SyntaxToken { TokenKind = SyntaxTokenKind.GetProperty, ValueText = "get" },
             new SyntaxToken { TokenKind = SyntaxTokenKind.SetProperty, ValueText = "set" },
         };

@@ -1,16 +1,29 @@
 ﻿using System;
+using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace AspectSharp.Core.Language
 {
-    public class TypeRef
+    public class TypeName
     {
-        public string Namespace { get; set; }
+        public TypeName(FullyQualifiedName @namespace, QualifiedName name)
+        {
+            Namespace = @namespace ?? throw new ArgumentNullException(nameof(@namespace));
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+        }
 
-        public string Class { get; set; }
+        public FullyQualifiedName Namespace { get; set; }
 
-        public string Name { get; set; }
+        public QualifiedName Name { get; set; }
+
+        //public static TypeName Any { get; } = new TypeName(FullyQualifiedName.Any, QualifiedName.Any);
+    }
+
+    public class MethodDef
+    {
+        public TypeName Type { get; set; }
     }
 
     public enum QualifiedNameMatchType
@@ -25,25 +38,75 @@ namespace AspectSharp.Core.Language
     [DebuggerDisplay("MatchType={MatchType} Name={Name}")]
     public class QualifiedName
     {
-        public QualifiedNameMatchType MatchType { get; set; }
+        public QualifiedName(string name, QualifiedNameMatchType matchType)
+        {
+            Name = name;
+            MatchType = matchType;
+        }
 
-        public string Name { get; set; }
+        public QualifiedNameMatchType MatchType { get; }
+
+        public string Name { get; }
+
+        public static QualifiedName Any { get; } = new QualifiedName(null, QualifiedNameMatchType.Any);
     }
 
-    public class FullyQualifiedName
+    public class FullyQualifiedName : IReadOnlyCollection<QualifiedName>
     {
+        private readonly IReadOnlyCollection<QualifiedName> parts;
 
+        private FullyQualifiedName()
+        {
+            parts = new QualifiedName[0]; 
+        }
+
+        public FullyQualifiedName(IReadOnlyCollection<QualifiedName> parts)
+        {
+            this.parts = parts ?? throw new ArgumentNullException(nameof(parts));
+        }
+
+        public static FullyQualifiedName Any { get; } = new FullyQualifiedName();
+
+        public static FullyQualifiedName None { get; } = new FullyQualifiedName();
+
+        public bool IsAny => ReferenceEquals(this, Any);
+
+        public bool IsNone => ReferenceEquals(this, None);
+
+        public int Count => parts.Count;
+
+        public IEnumerator<QualifiedName> GetEnumerator() => parts.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => parts.GetEnumerator();
+    }
+
+    public class ConstructorPointcutDefinition : PointcutDef
+    {
+        public override PointcutDefKind Kind => PointcutDefKind.Constructor;
+    }
+
+    public class PropertyPointcutDefinition : PointcutDef
+    {
+        public bool IsGet { get; set; } = true;
+
+        public bool IsSet { get; set; } = true;
+
+        public override PointcutDefKind Kind => IsGet && IsSet 
+            ? PointcutDefKind.Property 
+            : IsGet 
+                ? PointcutDefKind.GetProperty
+                : PointcutDefKind.SetProperty;
     }
 
     public class PointcutDef
     {
-        public AccessibilityToken Accessibility { get; internal set; }
+        public MemberAccessibility Accessibility { get; set; }
 
-        public MemberScopeToken MemberScope { get; set; }
+        public MemberScope Scope { get; set; }
 
-        public QualifiedName Type { get; set; }
+        public TypeName Type { get; set; }
 
-        public TypeRef ReturnType { get; set; }
+        public virtual PointcutDefKind Kind => PointcutDefKind.Any;
     }
 
     public enum PointcutDefKind
@@ -59,6 +122,7 @@ namespace AspectSharp.Core.Language
 
     public class LanguageParser
     {
+        private const int FullyQualifiedNameDepth = 125;
         private readonly LanguageLexer lexer;
         private SyntaxToken[] tokens = new SyntaxToken[0];
         private int tokenOffset = 0;
@@ -79,10 +143,43 @@ namespace AspectSharp.Core.Language
 
         protected void AdvanceToken(int n = 1) => tokenOffset += n;
 
+        protected bool Eat(SyntaxTokenKind t)
+        {
+            var token = CurrentToken;
+            if (token?.TokenKind == t)
+            {
+                AdvanceToken(1);
+                return true;
+            }
+
+            return false;
+        }
+
+        protected bool Eat(SyntaxTokenKind t1, SyntaxTokenKind? t2)
+        {
+            var token = CurrentToken;
+            if (token?.TokenKind == t1)
+            {
+                token = PeekToken(1);
+                if (token?.TokenKind == t2)
+                {
+                    AdvanceToken(2);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        protected bool Probe(SyntaxTokenKind t1)
+        {
+            return CurrentToken?.TokenKind == t1;
+        }
+
         public LanguageParser(LanguageLexer lexer)
         {
             this.lexer = lexer ?? throw new ArgumentNullException();
-        }
+        }    
 
         public PointcutDef ParsePointcut()
         {
@@ -90,14 +187,61 @@ namespace AspectSharp.Core.Language
 
             var accessibility = ParseAccessibility();
             var memberScope = ParseMemberScope();
-            var name = ParseQualifiedName();
+            var typeName = ParseTypeName();
 
-            return new PointcutDef
+            if (Eat(SyntaxTokenKind.Dot, SyntaxTokenKind.New))
             {
-                Accessibility = accessibility,
-                MemberScope = memberScope,
-                Type = name
-            };
+                return new ConstructorPointcutDefinition
+                {
+                    Accessibility = accessibility,
+                    Scope = memberScope,
+                    Type = typeName
+                };
+            }
+            else if (Eat(SyntaxTokenKind.Dot, SyntaxTokenKind.GetProperty))
+            {
+                return new PropertyPointcutDefinition { IsGet = true, IsSet = false };
+            }
+            else if (Eat(SyntaxTokenKind.Dot, SyntaxTokenKind.SetProperty))
+            {
+                return new PropertyPointcutDefinition { IsGet = true, IsSet = false };
+            }
+            else if (Probe(SyntaxTokenKind.LeftP))
+            {
+                return null; // method def
+            }
+            else
+            {
+                return new PointcutDef
+                {
+                    Accessibility = accessibility,
+                    Scope = memberScope,
+                    Type = typeName
+                };
+            }
+        }
+
+        protected TypeName ParseTypeName()
+        {
+            var parts = ParseFullyQualifiedName();
+
+            if (parts.Count == 1)
+            {
+                return new TypeName(FullyQualifiedName.None, parts.First());
+            }
+            else if (parts.Count == 2)
+            {
+                var p1 = parts.First();
+                var p2 = parts.Last();
+                return p2.MatchType == QualifiedNameMatchType.Any
+                    ? new TypeName(FullyQualifiedName.Any, p2)
+                    : new TypeName(new FullyQualifiedName(new[] { p1 }), p2);
+            }
+            else
+            {
+                var fqn = new FullyQualifiedName(parts.Take(parts.Count - 1).ToArray());
+                return new TypeName(fqn, parts.Last());
+            }
         }
 
         private void Lex()
@@ -116,45 +260,45 @@ namespace AspectSharp.Core.Language
             tokens = tokenList.ToArray();
         }
 
-        private AccessibilityToken ParseAccessibility()
+        private MemberAccessibility ParseAccessibility()
         {
             var token = CurrentToken;
             CheckToken(token);
 
-            AccessibilityToken accessibility;
+            MemberAccessibility accessibility;
 
             switch (token.TokenKind)
             {
                 case SyntaxTokenKind.Times:
-                    accessibility = AccessibilityToken.Any;
+                    accessibility = MemberAccessibility.Any;
                     break;
                 case SyntaxTokenKind.None:
                 case SyntaxTokenKind.Public:
                 case SyntaxTokenKind.Plus:
-                    accessibility = AccessibilityToken.Public;
+                    accessibility = MemberAccessibility.Public;
                     break;
                 case SyntaxTokenKind.Private:
                 case SyntaxTokenKind.Minus:
-                    accessibility = AccessibilityToken.Private;
+                    accessibility = MemberAccessibility.Private;
                     break;
                 case SyntaxTokenKind.Protected:
                 case SyntaxTokenKind.Hash:
-                    accessibility = AccessibilityToken.Protected;
+                    accessibility = MemberAccessibility.Protected;
                     break;
                 case SyntaxTokenKind.Internal:
-                    accessibility = AccessibilityToken.Internal;
+                    accessibility = MemberAccessibility.Internal;
                     break;
                 default:
-                    return AccessibilityToken.Public;
+                    return MemberAccessibility.Public;
             }
 
-            if (accessibility == AccessibilityToken.Protected)
+            if (accessibility == MemberAccessibility.Protected)
             {
                 var nextToken = PeekToken(1);
                 if (nextToken?.TokenKind == SyntaxTokenKind.Internal)
                 {
                     AdvanceToken(2);
-                    return AccessibilityToken.ProtectedInternal;
+                    return MemberAccessibility.ProtectedInternal;
                 }
             }
 
@@ -162,7 +306,7 @@ namespace AspectSharp.Core.Language
             return accessibility;
         }
 
-        private MemberScopeToken ParseMemberScope()
+        private MemberScope ParseMemberScope()
         {
             var token = CurrentToken;
             CheckToken(token);
@@ -171,12 +315,12 @@ namespace AspectSharp.Core.Language
             {
                 case SyntaxTokenKind.Instance:
                     AdvanceToken(1);
-                    return MemberScopeToken.Instance;
+                    return MemberScope.Instance;
                 case SyntaxTokenKind.Static:
                     AdvanceToken(1);
-                    return MemberScopeToken.Static;
+                    return MemberScope.Static;
                 default:
-                    return MemberScopeToken.Any;
+                    return MemberScope.Any;
             }
         }
 
@@ -224,9 +368,8 @@ namespace AspectSharp.Core.Language
                     }
                     else
                     {
-                        AdvanceToken(2);
-                        matchType = QualifiedNameMatchType.Any;
-                        name = null;
+                        AdvanceToken(1);
+                        return QualifiedName.Any;
                     }
                     break;
 
@@ -234,7 +377,37 @@ namespace AspectSharp.Core.Language
                     return null;
             }
 
-            return new QualifiedName { MatchType = matchType, Name = name };
+            return new QualifiedName(name, matchType);
+        }
+
+        private IReadOnlyCollection<QualifiedName> ParseFullyQualifiedName()
+        {
+            var names = new List<QualifiedName>(FullyQualifiedNameDepth);
+
+            do
+            {
+                var qualifiedName = ParseQualifiedName();
+                if (qualifiedName != null)
+                {
+                    names.Add(qualifiedName);
+                    var token = CurrentToken;
+
+                    if (token?.TokenKind == SyntaxTokenKind.Dot)
+                    {
+                        AdvanceToken(1);
+                        continue;
+                    }
+                }
+                else if (names.Count > 0)
+                {
+                    AdvanceToken(-1);
+                }
+
+                break;
+            }
+            while (true);
+
+            return names;
         }
 
         private static void CheckToken(SyntaxToken token, SyntaxTokenKind[] allowedTokens = null, SyntaxTokenKind[] expectedTokens = null)

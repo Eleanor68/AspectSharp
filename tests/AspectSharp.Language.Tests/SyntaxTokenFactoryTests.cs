@@ -34,7 +34,7 @@ namespace AspectSharp.Language.Tests
         [InlineData("iNsTaNce", SyntaxTokenKind.Instance)]
         [InlineData("static", SyntaxTokenKind.Static)]
         [InlineData("class", SyntaxTokenKind.Class)]
-        [InlineData("ctor", SyntaxTokenKind.Ctor)]
+        [InlineData("new", SyntaxTokenKind.New)]
         [InlineData("get", SyntaxTokenKind.GetProperty)]
         [InlineData("set", SyntaxTokenKind.SetProperty)]
         public void CheckKeywords(string text, SyntaxTokenKind token)
