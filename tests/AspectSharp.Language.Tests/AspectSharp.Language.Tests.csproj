@@ -66,9 +66,6 @@
     <Compile Include="SyntaxTokenFactoryTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="pointcuts.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
