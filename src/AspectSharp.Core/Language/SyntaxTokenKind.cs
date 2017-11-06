@@ -6,6 +6,7 @@
 
         Identifier,
         Dot,
+        Comma,
         Not,
         LeftP,
         RightP,
@@ -23,8 +24,12 @@
         Static,
         Class,
         New,
+        Ctor,
         GetProperty,
         SetProperty,
+        Out,
+        Ref,
+
 
         White,
         EndOfText

@@ -7,6 +7,7 @@ namespace AspectSharp.Language.Tests
     {
         [Theory]
         [InlineData('.', SyntaxTokenKind.Dot)]
+        [InlineData(',', SyntaxTokenKind.Comma)]
         [InlineData('!', SyntaxTokenKind.Not)]
         [InlineData('(', SyntaxTokenKind.LeftP)]
         [InlineData(')', SyntaxTokenKind.RightP)]
@@ -35,8 +36,11 @@ namespace AspectSharp.Language.Tests
         [InlineData("static", SyntaxTokenKind.Static)]
         [InlineData("class", SyntaxTokenKind.Class)]
         [InlineData("new", SyntaxTokenKind.New)]
+        [InlineData("ctor", SyntaxTokenKind.Ctor)]
         [InlineData("get", SyntaxTokenKind.GetProperty)]
         [InlineData("set", SyntaxTokenKind.SetProperty)]
+        [InlineData("out", SyntaxTokenKind.Out)]
+        [InlineData("ref", SyntaxTokenKind.Ref)]
         public void CheckKeywords(string text, SyntaxTokenKind token)
         {
             var langText = new LanguageText(text);

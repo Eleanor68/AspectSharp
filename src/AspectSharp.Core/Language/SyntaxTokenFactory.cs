@@ -6,6 +6,7 @@
     public static class SyntaxTokenFactory
     {
         private static readonly SyntaxToken Dot = new SyntaxToken { TokenKind = SyntaxTokenKind.Dot, ValueText = "." };
+        private static readonly SyntaxToken Comma = new SyntaxToken { TokenKind = SyntaxTokenKind.Comma, ValueText = "," };
         private static readonly SyntaxToken Not = new SyntaxToken { TokenKind = SyntaxTokenKind.Not, ValueText = "!" };
         private static readonly SyntaxToken LeftP = new SyntaxToken { TokenKind = SyntaxTokenKind.LeftP, ValueText = "(" };
         private static readonly SyntaxToken RightP = new SyntaxToken { TokenKind = SyntaxTokenKind.RightP, ValueText = ")" };
@@ -28,8 +29,11 @@
             new SyntaxToken { TokenKind = SyntaxTokenKind.Static, ValueText = "static" },
             new SyntaxToken { TokenKind = SyntaxTokenKind.Class, ValueText = "class" },
             new SyntaxToken { TokenKind = SyntaxTokenKind.New, ValueText = "new" },
+            new SyntaxToken { TokenKind = SyntaxTokenKind.Ctor, ValueText = "ctor" },
             new SyntaxToken { TokenKind = SyntaxTokenKind.GetProperty, ValueText = "get" },
             new SyntaxToken { TokenKind = SyntaxTokenKind.SetProperty, ValueText = "set" },
+            new SyntaxToken { TokenKind = SyntaxTokenKind.Out, ValueText = "out" },
+            new SyntaxToken { TokenKind = SyntaxTokenKind.Ref, ValueText = "ref" }
         };
 
         public static SyntaxToken MakeIdent(LanguageText text, int offset, int count)
@@ -56,6 +60,7 @@
             switch (c)
             {
                 case '.': return Dot;
+                case ',': return Comma;
                 case '!': return Not;
                 case '(': return LeftP;
                 case ')': return RightP;

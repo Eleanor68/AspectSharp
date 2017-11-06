@@ -38,7 +38,7 @@ namespace AspectSharp.Core.Language
             //32..39
             (byte)CharMark.White, (byte)CharMark.Punct, (byte)CharMark.Unknown, (byte)CharMark.Punct, (byte)CharMark.Unknown, (byte)CharMark.Unknown, (byte)CharMark.Punct, (byte)CharMark.Unknown,
             //40..47
-            (byte)CharMark.Punct, (byte)CharMark.Punct, (byte)CharMark.Punct, (byte)CharMark.Punct, (byte)CharMark.Unknown, (byte)CharMark.Punct, (byte)CharMark.Punct, (byte)CharMark.Unknown,
+            (byte)CharMark.Punct, (byte)CharMark.Punct, (byte)CharMark.Punct, (byte)CharMark.Punct, (byte)CharMark.Punct, (byte)CharMark.Punct, (byte)CharMark.Punct, (byte)CharMark.Unknown,
             //48..57
             (byte)CharMark.Digit, (byte)CharMark.Digit, (byte)CharMark.Digit, (byte)CharMark.Digit, (byte)CharMark.Digit, (byte)CharMark.Digit, (byte)CharMark.Digit, (byte)CharMark.Digit, (byte)CharMark.Digit, (byte)CharMark.Digit,
             //58..64
