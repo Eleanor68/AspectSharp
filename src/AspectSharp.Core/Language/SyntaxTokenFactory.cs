@@ -32,6 +32,8 @@
             new SyntaxToken { TokenKind = SyntaxTokenKind.Ctor, ValueText = "ctor" },
             new SyntaxToken { TokenKind = SyntaxTokenKind.GetProperty, ValueText = "get" },
             new SyntaxToken { TokenKind = SyntaxTokenKind.SetProperty, ValueText = "set" },
+            new SyntaxToken { TokenKind = SyntaxTokenKind.Property, ValueText = "property" },
+            new SyntaxToken { TokenKind = SyntaxTokenKind.Property, ValueText = "prop" },
             new SyntaxToken { TokenKind = SyntaxTokenKind.Out, ValueText = "out" },
             new SyntaxToken { TokenKind = SyntaxTokenKind.Ref, ValueText = "ref" }
         };
@@ -45,7 +47,7 @@
             for (int i = 0; i < Keywords.Length; i++)
             {
                 var keyword = Keywords[i];
-                if (keyword.ValueText.Equals(lexemeText, System.StringComparison.OrdinalIgnoreCase))
+                if (keyword.ValueText.Equals(lexemeText, System.StringComparison.Ordinal))
                 {
                     return keyword;
                 }

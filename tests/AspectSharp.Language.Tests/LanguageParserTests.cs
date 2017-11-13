@@ -8,6 +8,8 @@ namespace AspectSharp.Language.Tests
 {
     public class LanguageParserTests
     {
+        private const string NullString = null;
+
         [Theory]
         [InlineData(MemberVisibility.Public, "string Namespace.Class.Method()")]
         [InlineData(MemberVisibility.Public, "public string Namespace.Class.Method()")]
@@ -82,11 +84,14 @@ namespace AspectSharp.Language.Tests
             new object [] { "public *.new", new (ParameterModifier, string)[0] },
             new object [] { "public *.new()", new (ParameterModifier, string)[0] },
             new object [] { "public *.new(..)", new (ParameterModifier, string)[0] },
-            new object [] { "public *.new(*)", new [] { (ParameterModifier.In, (string)null) } },
+            new object [] { "public *.new(*)", new [] { (ParameterModifier.In, NullString) } },
             new object [] { "public *.new(int)", new [] { (ParameterModifier.In, "int") } },
             new object [] { "public *.new(out int)", new [] { (ParameterModifier.Out, "int") } },
             new object [] { "public *.new(ref int)", new [] { (ParameterModifier.Ref, "int") } },
             new object [] { "public *.new(ref int, out int)", new [] { (ParameterModifier.Ref, "int"), (ParameterModifier.Out, "int") } },
+            new object [] { "public *.new(out *)", new [] { (ParameterModifier.Out, NullString) } },
+            new object [] { "public *.new(ref *)", new [] { (ParameterModifier.Ref, NullString) } },
+            new object [] { "public Namespace.Class.new(Namespace.Class)", new [] { (ParameterModifier.In, "Class") } },
         };
 
         [Theory]
@@ -107,6 +112,29 @@ namespace AspectSharp.Language.Tests
                 Assert.Equal(item.p2.TypeName, item.Item1.Name);
             }
         }
+
+        /*[Theory]
+        [InlineData("public int Namespace.Class.GetProperty.get", MemberVisibility.Public, "int", "Namespace.Class", "GetProperty", true, false)]
+        [InlineData("public int Namespace.Class.SetProperty.set", MemberVisibility.Public, "int", "Namespace.Class", "SetProperty", false, true)]
+        [InlineData("public int Namespace.Class.Property.property", MemberVisibility.Public, "int", "Namespace.Class", "Property", true, true)]*/
+        public void CheckProperty(string pointcutDef, MemberVisibility visibility, string propertyType, string definedType, string propertyName, bool isGet, bool isSet)
+        {
+            var pointcut = ParseMember(pointcutDef);
+            var propertyPointcut = Assert.IsType<PropertyPointcutSyntax>(pointcut);
+
+            Assert.NotNull(propertyPointcut);
+            Assert.NotNull(propertyPointcut.Type);
+            Assert.NotNull(propertyPointcut.DeclaredType);
+            Assert.NotNull(propertyPointcut.Name);
+
+            Assert.Equal(visibility, propertyPointcut.Visibility);
+            Assert.Equal(propertyType, propertyPointcut.Type.Name.Name);
+            Assert.Equal(definedType, propertyPointcut.DeclaredType.Name.Name);
+            Assert.Equal(propertyName, propertyPointcut.Name.Name);
+            Assert.Equal(isGet, propertyPointcut.IsGet);
+            Assert.Equal(isSet, propertyPointcut.IsSet);
+        }
+
 
         private static MemberPointcutSyntax ParseMember(string pointcutDef)
         {

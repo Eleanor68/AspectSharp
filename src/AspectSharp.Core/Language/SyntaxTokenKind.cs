@@ -27,6 +27,7 @@
         Ctor,
         GetProperty,
         SetProperty,
+        Property,
         Out,
         Ref,
 

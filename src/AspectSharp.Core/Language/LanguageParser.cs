@@ -62,7 +62,7 @@ namespace AspectSharp.Core.Language
 
         protected bool Probe(SyntaxTokenKind t1)
         {
-            return CurrentToken?.TokenKind == t1;
+            return PeekToken(0)?.TokenKind == t1;
         }
 
         protected bool Probe(SyntaxTokenKind t1, SyntaxTokenKind t2)
@@ -81,7 +81,7 @@ namespace AspectSharp.Core.Language
 
             var visibility = ParseVisibility();
             var memberScope = ParseMemberScope();
-            var typeName = ParseTypeName();
+            var returnType = ParseTypeName();
 
             if (Eat(SyntaxTokenKind.Dot, SyntaxTokenKind.New) || Eat(SyntaxTokenKind.Dot, SyntaxTokenKind.Ctor))
             {
@@ -91,30 +91,63 @@ namespace AspectSharp.Core.Language
                 {
                     Visibility = visibility,
                     Scope = memberScope,
-                    Type = typeName,
+                    Type = returnType,
                     Parameters = parameterListSyntax
                 };
             }
-            else if (Eat(SyntaxTokenKind.Dot, SyntaxTokenKind.GetProperty))
-            {
-                return new PropertyPointcutSyntax { IsGet = true, IsSet = false };
-            }
-            else if (Eat(SyntaxTokenKind.Dot, SyntaxTokenKind.SetProperty))
-            {
-                return new PropertyPointcutSyntax { IsGet = true, IsSet = false };
-            }
-            else if (Probe(SyntaxTokenKind.LeftP))
-            {
-                return null; // method def
-            }
             else
             {
-                return new MemberPointcutSyntax
+                var typeName = ParseTypeName();
+                TypeNameSyntax declaredTypeName = null;//ParseTypeName();
+
+                if (Probe(SyntaxTokenKind.Dot, SyntaxTokenKind.GetProperty))
                 {
-                    Visibility = visibility,
-                    Scope = memberScope,
-                    Type = typeName
-                };
+                    return new PropertyPointcutSyntax
+                    {
+                        Visibility = visibility,
+                        Scope = memberScope,
+                        Type = typeName,
+                        DeclaredType = declaredTypeName,
+                        IsGet = true,
+                        IsSet = false
+                    };
+                }
+                else if (Eat(SyntaxTokenKind.Dot, SyntaxTokenKind.SetProperty))
+                {
+                    return new PropertyPointcutSyntax
+                    {
+                        Visibility = visibility,
+                        Type = typeName,
+                        DeclaredType = declaredTypeName,
+                        IsGet = false,
+                        IsSet = true
+                    };
+                }
+                else if (Eat(SyntaxTokenKind.Dot, SyntaxTokenKind.Property))
+                {
+                    return new PropertyPointcutSyntax
+                    {
+                        Visibility = visibility,
+                        Type = typeName,
+                        DeclaredType = declaredTypeName,
+                        IsGet = true,
+                        IsSet = true
+                    };
+                }
+                /*else if (Probe(SyntaxTokenKind.LeftP))
+                {
+                    return null; // method def
+                }*/
+                else
+                {
+                    return new MemberPointcutSyntax
+                    {
+                        Visibility = visibility,
+                        Scope = memberScope,
+                        Type = typeName
+                    };
+                }
+
             }
         }
 

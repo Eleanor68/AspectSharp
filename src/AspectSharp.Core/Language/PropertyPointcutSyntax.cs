@@ -2,6 +2,10 @@
 {
     public sealed class PropertyPointcutSyntax : MemberPointcutSyntax
     {
+        public QualifiedNameSyntax Name { get; set; }
+
+        public TypeNameSyntax DeclaredType { get; set; }
+
         public bool IsGet { get; set; } = true;
 
         public bool IsSet { get; set; } = true;
