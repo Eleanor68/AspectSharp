@@ -14,19 +14,19 @@ ___
 
 ### Constructor Form-1
 
-|     | Expression                      | Meaning                           |
-| --- | ------------------------------- | --------------------------------- |
-| [x] | `public Namespace.Class.new`                    | all public constructors from Namespace.Class |
-| [x] | `public Namespace.Class.new()`                  | default constructor from Namespace.Class |
-| [x] | `public Namespace.Class.new(..)`                | all public constructors from Namespace.Class with any number of parameters |
-| [x] | `public Namespace.Class.new(*)`                 | all public constructors from Namespace.Class with one parameter of any type |
-| [x] | `public Namespace.Class.new(int)`               | cast constructor from Namespace.Class with one parameter of `int` type |
-| [x] | `public Namespace.Class.new(ref int)`           | cast constructor from Namespace.Class with one `ref` paratemer of `int` type |
-| [x] | `public Namespace.Class.new(out int)`           | cast constructor from Namespace.Class with one `out` parameter of `int` type |
-| [x] | `public Namespace.Class.new(out *)`             | cast constructor from Namespace.Class with one `out` parameter of any type |
-| [x] | `public Namespace.Class.new(Namespace.Class)`   | copy constructor from Namespace.Class |
-| [ ] | `public Namespace.Class.new(int[])`             | constructor from Namespace.Class |
-| [ ] | `public Namespace.Class.new(IEnumerable<int>)`  | constructor from Namespace.Class |
+|    | Expression                      | Meaning                           |
+| -- | ------------------------------- | --------------------------------- |
+| ✔ | `public Namespace.Class.new`                    | all public constructors from Namespace.Class |
+| ✔ | `public Namespace.Class.new()`                  | default constructor from Namespace.Class |
+| ✔ | `public Namespace.Class.new(..)`                | all public constructors from Namespace.Class with any number of parameters |
+| ✔ | `public Namespace.Class.new(*)`                 | all public constructors from Namespace.Class with one parameter of any type |
+| ✔ | `public Namespace.Class.new(int)`               | cast constructor from Namespace.Class with one parameter of `int` type |
+| ✔ | `public Namespace.Class.new(ref int)`           | cast constructor from Namespace.Class with one `ref` paratemer of `int` type |
+| ✔ | `public Namespace.Class.new(out int)`           | cast constructor from Namespace.Class with one `out` parameter of `int` type |
+| ✔ | `public Namespace.Class.new(out *)`             | cast constructor from Namespace.Class with one `out` parameter of any type |
+| ✔ | `public Namespace.Class.new(Namespace.Class)`   | copy constructor from Namespace.Class |
+| ✘ | `public Namespace.Class.new(int[])`             | constructor from Namespace.Class |
+| ✘ | `public Namespace.Class.new(IEnumerable<int>)`  | constructor from Namespace.Class |
 
 > The `new` keyword can be replaced with `ctor`
 
@@ -45,25 +45,25 @@ ___
 
 ### Property Form-1
 
-|     | Expression                      | Meaning                           |
-| --- | ------------------------------- | --------------------------------- |
-| [ ] | `public string DomainObjects.Person.Name.property` | public read-write property `Name` of `string` type from `DomainObjects.Person` |
-| [ ] | `public DomainObjects.Person.Name.property` | public read-write property `Name` of any type from `DomainObjects.Person` |
-| [ ] | `public * DomainObjects.Person.Name.property` | public read-write property `Name` of any type from `DomainObjects.Person` |
-| [ ] | `public * Person.*.property` | public read-write property `Name` of any type from class `Person` |
-| [ ] | `public Person.*.property` | public read-write property `Name` of any type from class `Person` |
-| [ ] | `public DomainObjects.*.*.property` | all public read-write properties of any types from namespace `DomainObjects` |
+|    | Expression                      | Meaning                           |
+| -- | ------------------------------- | --------------------------------- |
+| ✘ | `public string DomainObjects.Person.Name.property` | public read-write property `Name` of `string` type from `DomainObjects.Person` |
+| ✘ | `public DomainObjects.Person.Name.property` | public read-write property `Name` of any type from `DomainObjects.Person` |
+| ✘ | `public * DomainObjects.Person.Name.property` | public read-write property `Name` of any type from `DomainObjects.Person` |
+| ✘ | `public * Person.*.property` | public read-write property `Name` of any type from class `Person` |
+| ✘ | `public Person.*.property` | public read-write property `Name` of any type from class `Person` |
+| ✘ | `public DomainObjects.*.*.property` | all public read-write properties of any types from namespace `DomainObjects` |
 
-### Property Form-2 [ ]
+### Property Form-2
 
-|     | Expression                      | Meaning                           |
-| --- | ------------------------------- | --------------------------------- |
-| [ ] | `public DomainObjects.Person.Name.property -> string` | public read-write property `Name` of `string` type from `DomainObjects.Person` |
-| [ ] | `public DomainObjects.Person.Name.property -> *` | public read-write property `Name` of any type from `DomainObjects.Person` |
-| [ ] | `public Person.*.property -> *` | public read-write property `Name` of any type from class `Person` |
-| [ ] | `public DomainObjects.*.*.property -> string` | all public read-write properties of type string from namespace `DomainObjects` |
+|    | Expression                      | Meaning                           |
+| -- | ------------------------------- | --------------------------------- |
+| ✘ | `public DomainObjects.Person.Name.property -> string` | public read-write property `Name` of `string` type from `DomainObjects.Person` |
+| ✘ | `public DomainObjects.Person.Name.property -> *` | public read-write property `Name` of any type from `DomainObjects.Person` |
+| ✘ | `public Person.*.property -> *` | public read-write property `Name` of any type from class `Person` |
+| ✘ | `public DomainObjects.*.*.property -> string` | all public read-write properties of type string from namespace `DomainObjects` |
 
-* The `visibility` keyword can be omited and in this case the default value will be `public`
+* The `visibility` keyword can be omitted and in this case the default value will be `public`
 * The `property` keyword has an alias `prop`
 * If we replace `property` with `get` the pointcut will target only property get accessor
 * If we replace `property` with `set` the pointcut will target only property set accessor
@@ -107,6 +107,7 @@ ___
 
 <argument-list> := {to be completed}
 ```
+
 ___
 
 ## Conflicts
