@@ -9,7 +9,7 @@ ___
 ## Constructors
 
 ``` def
-<constructor-token> := visibility-token member-scope-token? fully-qualified-name-token '.' (new-keyword | ctor-keyword) argument-list?
+<constructor-token> := visibility-token member-scope-token? qualified-name-token '.' (new-keyword | ctor-keyword) argument-list?
 ```
 
 ### Constructor Form-1
@@ -39,8 +39,8 @@ ___
 ## Properties
 
 ``` def
-<property-token> := visibility-token? member-scope-token? fully-qualified-name-token? fully-qualified-name-token '.' ('get' | 'set' | 'prop' | 'property')
-<property-token> := visibility-token? member-scope-token? fully-qualified-name-token '.' ('get' | 'set' | 'prop' | 'property') -> fully-qualified-name-token
+<property-token> := visibility-token? member-scope-token? qualified-name-token? qualified-name-token '.' ('get' | 'set' | 'prop' | 'property')
+<property-token> := visibility-token? member-scope-token? qualified-name-token '.' ('get' | 'set' | 'prop' | 'property') -> qualified-name-token
 ```
 
 ### Property Form-1
@@ -63,10 +63,10 @@ ___
 | ✘ | `public Person.*.property -> *` | public read-write property `Name` of any type from class `Person` |
 | ✘ | `public DomainObjects.*.*.property -> string` | all public read-write properties of type string from namespace `DomainObjects` |
 
-* The `visibility` keyword can be omitted and in this case the default value will be `public`
-* The `property` keyword has an alias `prop`
-* If we replace `property` with `get` the pointcut will target only property get accessor
-* If we replace `property` with `set` the pointcut will target only property set accessor
+* The default value of visibility is `public` so it could be skipped 
+* The `prop` keyword is an alias for `property` keyword
+* Replace `property` with `get` to target only property get accessor
+* Replace `property` with `set` to target only property set accessor
 
 ___
 
@@ -102,8 +102,8 @@ ___
 <visibility-token> := 'public' | 'private' | 'protected' | 'internal' | 'protected internal'
 
 <identifier-token> := (w | W | '_')+ (w | W | d | '_')*
-<qualified-name-token> := identifier-token | ('*' identifier-token) | (identifier-token '*') | ('*' identifier-token '*') | '*'
-<fully-qualified-name-token> := qualified-name-token | (qualified-name-token '.' qualified-name-token)+
+<identifier-name-token> := identifier-token | ('*' identifier-token) | (identifier-token '*') | ('*' identifier-token '*') | '*'
+<qualified-name-token> := identifier-name-token | (identifier-name-token '.' identifier-name-token)+
 
 <argument-list> := {to be completed}
 ```

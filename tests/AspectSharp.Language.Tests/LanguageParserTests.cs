@@ -42,31 +42,32 @@ namespace AspectSharp.Language.Tests
         }
 
         [Theory]
-        [InlineData(QualifiedNameMatchType.Any, "public *.new", null)]
-        [InlineData(QualifiedNameMatchType.Any, "public *.*.new", null)]
-        [InlineData(QualifiedNameMatchType.Strict, "public string.new", "string")]
-        [InlineData(QualifiedNameMatchType.EndsWith, "public *string.new", "string")]
-        [InlineData(QualifiedNameMatchType.StartsWith, "public string*.new", "string")]
-        [InlineData(QualifiedNameMatchType.Contains, "public *string*.new", "string")]
-        public void CheckNewBasedConstructor(QualifiedNameMatchType matchType, string pointcutDef, string name)
+        [InlineData(IdentifierNameMatchType.Any, "*.new", null)]
+        [InlineData(IdentifierNameMatchType.Any, "public *.new", null)]
+        [InlineData(IdentifierNameMatchType.Any, "public *.*.new", null)]
+        [InlineData(IdentifierNameMatchType.Strict, "public string.new", "string")]
+        [InlineData(IdentifierNameMatchType.EndsWith, "public *string.new", "string")]
+        [InlineData(IdentifierNameMatchType.StartsWith, "public string*.new", "string")]
+        [InlineData(IdentifierNameMatchType.Contains, "public *string*.new", "string")]
+        public void CheckNewBasedConstructor(IdentifierNameMatchType matchType, string pointcutDef, string name)
         {
             var pointcut = ParseMember(pointcutDef);
             var constructorPointcut = Assert.IsType<ConstructorPointcutSyntax>(pointcut);
 
             Assert.NotNull(constructorPointcut);
             Assert.NotNull(constructorPointcut.Type);
-            Assert.Equal(matchType, constructorPointcut.Type.Name.MatchType);
-            Assert.Equal(name, constructorPointcut.Type.Name.Name);
+            Assert.Equal(matchType, constructorPointcut.Type.TypeName.MatchType);
+            Assert.Equal(name, constructorPointcut.Type.TypeName.Name);
         }
 
         [Theory]
-        [InlineData(QualifiedNameMatchType.Any, "public *.ctor", null)]
-        [InlineData(QualifiedNameMatchType.Any, "public *.*.ctor", null)]
-        [InlineData(QualifiedNameMatchType.Strict, "public string.ctor", "string")]
-        [InlineData(QualifiedNameMatchType.EndsWith, "public *string.ctor", "string")]
-        [InlineData(QualifiedNameMatchType.StartsWith, "public string*.ctor", "string")]
-        [InlineData(QualifiedNameMatchType.Contains, "public *string*.ctor", "string")]
-        public void CheckCtorBasedConstructor(QualifiedNameMatchType matchType, string pointcutDef, string name)
+        [InlineData(IdentifierNameMatchType.Any, "public *.ctor", null)]
+        [InlineData(IdentifierNameMatchType.Any, "public *.*.ctor", null)]
+        [InlineData(IdentifierNameMatchType.Strict, "public string.ctor", "string")]
+        [InlineData(IdentifierNameMatchType.EndsWith, "public *string.ctor", "string")]
+        [InlineData(IdentifierNameMatchType.StartsWith, "public string*.ctor", "string")]
+        [InlineData(IdentifierNameMatchType.Contains, "public *string*.ctor", "string")]
+        public void CheckCtorBasedConstructor(IdentifierNameMatchType matchType, string pointcutDef, string name)
         {
             var pointcut = ParseMember(pointcutDef);
             var constructorPointcut = Assert.IsType<ConstructorPointcutSyntax>(pointcut);
@@ -74,14 +75,15 @@ namespace AspectSharp.Language.Tests
             Assert.NotNull(constructorPointcut);
             Assert.NotNull(constructorPointcut.Type);
             Assert.NotNull(constructorPointcut.Parameters);
-            Assert.Equal(matchType, constructorPointcut.Type.Name.MatchType);
-            Assert.Equal(name, constructorPointcut.Type.Name.Name);
+            Assert.Equal(matchType, constructorPointcut.Type.TypeName.MatchType);
+            Assert.Equal(name, constructorPointcut.Type.TypeName.Name);
             Assert.Same(ParameterListSyntax.Any, constructorPointcut.Parameters);
         }
 
-        public static object[] parameterizedConstructorData = new object[]
+        public static IEnumerable<object[]> parameterizedConstructorData = new []
         {
-            new object [] { "public *.new", new (ParameterModifier, string)[0] },
+            new object [] { "*.new", new (ParameterModifier, string)[0] },
+            new object [] { "public *.new", new(ParameterModifier, string)[0] },
             new object [] { "public *.new()", new (ParameterModifier, string)[0] },
             new object [] { "public *.new(..)", new (ParameterModifier, string)[0] },
             new object [] { "public *.new(*)", new [] { (ParameterModifier.In, NullString) } },
@@ -95,7 +97,7 @@ namespace AspectSharp.Language.Tests
         };
 
         [Theory]
-        [MemberData("parameterizedConstructorData")]
+        [MemberData(nameof(parameterizedConstructorData))]
         public void CheckParameterizedConstructor(string pointcutDef, (ParameterModifier Modifier, string TypeName)[] parameters)
         {
             var pointcut = ParseMember(pointcutDef);
@@ -106,17 +108,37 @@ namespace AspectSharp.Language.Tests
             Assert.NotNull(constructorPointcut.Parameters);
             Assert.Equal(parameters.Length, constructorPointcut.Parameters.Count);
 
-            foreach (var item in constructorPointcut.Parameters.Zip(parameters, (p1, p2) => ((p1.Modifier, p1.TypeName.Name.Name), p2)).ToArray())
+            foreach (var item in constructorPointcut.Parameters.Zip(parameters, (p1, p2) => ((p1.Modifier, p1.TypeName.TypeName.Name), p2)).ToArray())
             {
                 Assert.Equal(item.p2.Modifier, item.Item1.Modifier);
                 Assert.Equal(item.p2.TypeName, item.Item1.Name);
             }
         }
 
-        /*[Theory]
+        [Theory]
+        //[InlineData("*Property.property", MemberVisibility.Public, "*.*", "*.*", "*Property", true, true)] 
+        //we can not detect if the * from `*Property` is related to visibility or to name because we ignore whitespaces
+        [InlineData("*.property", MemberVisibility.Public, "*", "*", "*", true, true)] //a kind of shortcut, allowed by language because of precedence of '.'
+        [InlineData("*.*Property.property", MemberVisibility.Public, "*", "*", "*Property", true, true)]
+        [InlineData("*.*.get", MemberVisibility.Public, "*", "*", "*", true, false)]
         [InlineData("public int Namespace.Class.GetProperty.get", MemberVisibility.Public, "int", "Namespace.Class", "GetProperty", true, false)]
         [InlineData("public int Namespace.Class.SetProperty.set", MemberVisibility.Public, "int", "Namespace.Class", "SetProperty", false, true)]
-        [InlineData("public int Namespace.Class.Property.property", MemberVisibility.Public, "int", "Namespace.Class", "Property", true, true)]*/
+        [InlineData("public int Namespace.Class.Property.property", MemberVisibility.Public, "int", "Namespace.Class", "Property", true, true)]
+        [InlineData("int Namespace.Class.GetProperty.get", MemberVisibility.Public, "int", "Namespace.Class", "GetProperty", true, false)]
+        [InlineData("int Namespace.Class.SetProperty.set", MemberVisibility.Public, "int", "Namespace.Class", "SetProperty", false, true)]
+        [InlineData("int Namespace.Class.Property.property", MemberVisibility.Public, "int", "Namespace.Class", "Property", true, true)]
+        [InlineData("Namespace.Class.GetProperty.get", MemberVisibility.Public, "*", "Namespace.Class", "GetProperty", true, false)]
+        [InlineData("Namespace.Class.SetProperty.set", MemberVisibility.Public, "*", "Namespace.Class", "SetProperty", false, true)]
+        [InlineData("Namespace.Class.Property.property", MemberVisibility.Public, "*", "Namespace.Class", "Property", true, true)]
+        [InlineData("Namespace.Class.*.property", MemberVisibility.Public, "*", "Namespace.Class", "*", true, true)]
+        [InlineData("Namespace.Class.*Property*.property", MemberVisibility.Public, "*", "Namespace.Class", "*Property*", true, true)]
+        [InlineData("Namespace.Class.Property*.property", MemberVisibility.Public, "*", "Namespace.Class", "Property*", true, true)]
+        [InlineData("Namespace.Class.*Property.property", MemberVisibility.Public, "*", "Namespace.Class", "*Property", true, true)]
+        [InlineData("Namespace.*.*Property.property", MemberVisibility.Public, "*", "Namespace.*", "*Property", true, true)]
+        [InlineData("- Namespace.SubNamespace.Class.GetProperty.get", MemberVisibility.Private, "*", "Namespace.SubNamespace.Class", "GetProperty", true, false)]
+        [InlineData("- Namespace.SubNamespace.Class.SetProperty.set", MemberVisibility.Private, "*", "Namespace.SubNamespace.Class", "SetProperty", false, true)]
+        [InlineData("- Namespace.SubNamespace.Class.Property.property", MemberVisibility.Private, "*", "Namespace.SubNamespace.Class", "Property", true, true)]
+
         public void CheckProperty(string pointcutDef, MemberVisibility visibility, string propertyType, string definedType, string propertyName, bool isGet, bool isSet)
         {
             var pointcut = ParseMember(pointcutDef);
@@ -128,9 +150,9 @@ namespace AspectSharp.Language.Tests
             Assert.NotNull(propertyPointcut.Name);
 
             Assert.Equal(visibility, propertyPointcut.Visibility);
-            Assert.Equal(propertyType, propertyPointcut.Type.Name.Name);
-            Assert.Equal(definedType, propertyPointcut.DeclaredType.Name.Name);
-            Assert.Equal(propertyName, propertyPointcut.Name.Name);
+            Assert.Equal(propertyType, propertyPointcut.Type.ToString());
+            Assert.Equal(definedType, propertyPointcut.DeclaredType.ToString());
+            Assert.Equal(propertyName, propertyPointcut.Name.ToString());
             Assert.Equal(isGet, propertyPointcut.IsGet);
             Assert.Equal(isSet, propertyPointcut.IsSet);
         }

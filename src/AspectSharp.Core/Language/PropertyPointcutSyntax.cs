@@ -2,7 +2,7 @@
 {
     public sealed class PropertyPointcutSyntax : MemberPointcutSyntax
     {
-        public QualifiedNameSyntax Name { get; set; }
+        public IdentifierNameSyntax Name { get; set; }
 
         public TypeNameSyntax DeclaredType { get; set; }
 

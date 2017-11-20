@@ -1,6 +1,6 @@
 ﻿namespace AspectSharp.Core.Language
 {
-    public enum QualifiedNameMatchType
+    public enum IdentifierNameMatchType
     {
         Any,
         Strict,
