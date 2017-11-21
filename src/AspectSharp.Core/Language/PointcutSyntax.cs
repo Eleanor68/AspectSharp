@@ -2,6 +2,6 @@
 {
     public abstract class PointcutSyntax
     {
-        public virtual PointcutSyntaxKind Kind => PointcutSyntaxKind.Any;
+        public abstract PointcutSyntaxKind Kind { get; }
     }
 }

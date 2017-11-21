@@ -6,7 +6,7 @@
 
         public MemberScope Scope { get; set; }
 
-        public TypeNameSyntax Type { get; set; }
+        public TypeNameSyntax DeclaredType { get; set; }
 
         public override PointcutSyntaxKind Kind => PointcutSyntaxKind.Member;
     }

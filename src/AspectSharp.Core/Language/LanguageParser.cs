@@ -59,6 +59,13 @@ namespace AspectSharp.Core.Language
             return false;
         }
 
+        protected int EatWhiteTokens()
+        {
+            var c = 0;
+            for (; EatToken(SyntaxTokenKind.White); c++) ;
+            return c;
+        }
+
         protected bool ProbeToken(SyntaxTokenKind t1)
         {
             return PeekToken(0)?.TokenKind == t1;
@@ -76,11 +83,11 @@ namespace AspectSharp.Core.Language
 
         public MemberPointcutSyntax ParseMemberPointcut()
         {
-            Lex();
+            Lex(false);
 
             var visibility = ParseVisibility();
             var memberScope = ParseMemberScope();
-            var memberTypeParts = ParseQualifiedName();
+            var returnTypeParts = ParseQualifiedName();
 
             if (EatToken(SyntaxTokenKind.Dot, SyntaxTokenKind.New) || EatToken(SyntaxTokenKind.Dot, SyntaxTokenKind.Ctor))
             {
@@ -90,23 +97,24 @@ namespace AspectSharp.Core.Language
                 {
                     Visibility = visibility,
                     Scope = memberScope,
-                    Type = TypeNameSyntax.Create(memberTypeParts),
+                    DeclaredType = TypeNameSyntax.Create(returnTypeParts),
                     Parameters = parameterListSyntax
                 };
             }
             else
             {
                 var declaredTypeParts = ParseQualifiedName();
-                TypeNameSyntax memberReturnTypeName;
+
+                TypeNameSyntax returnTypeName;
 
                 if (declaredTypeParts.Any())
                 {
-                    memberReturnTypeName = TypeNameSyntax.Create(memberTypeParts);
+                    returnTypeName = TypeNameSyntax.Create(returnTypeParts);
                 }
                 else
                 {
-                    declaredTypeParts = memberTypeParts;
-                    memberReturnTypeName = TypeNameSyntax.None;
+                    declaredTypeParts = returnTypeParts;
+                    returnTypeName = TypeNameSyntax.None;
                 }
 
                 if (ProbeToken(SyntaxTokenKind.Dot, SyntaxTokenKind.GetProperty))
@@ -116,7 +124,7 @@ namespace AspectSharp.Core.Language
                     {
                         Visibility = visibility,
                         Scope = memberScope,
-                        Type = memberReturnTypeName,
+                        PropertyType = returnTypeName,
                         DeclaredType = declaredTypeName,
                         Name = propertyName,
                         IsGet = true,
@@ -129,7 +137,7 @@ namespace AspectSharp.Core.Language
                     return new PropertyPointcutSyntax
                     {
                         Visibility = visibility,
-                        Type = memberReturnTypeName,
+                        PropertyType = returnTypeName,
                         DeclaredType = declaredTypeName,
                         Name = propertyName,
                         IsGet = false,
@@ -142,27 +150,36 @@ namespace AspectSharp.Core.Language
                     return new PropertyPointcutSyntax
                     {
                         Visibility = visibility,
-                        Type = memberReturnTypeName,
+                        PropertyType = returnTypeName,
                         DeclaredType = declaredTypeName,
                         Name = propertyName,
                         IsGet = true,
                         IsSet = true
                     };
                 }
-                /*else if (Probe(SyntaxTokenKind.LeftP))
+                else if (ProbeToken(SyntaxTokenKind.LeftP))
                 {
-                    return null; // method def
-                }*/
+                    var parameterListSyntax = ParseParameterList();
+                    Explode(declaredTypeParts, out var declaredTypeName, out var methodName);
+
+                    return new MethodPointcutSyntax
+                    {
+                        Visibility = visibility,
+                        Scope = memberScope,
+                        DeclaredType = declaredTypeName,
+                        MethodName = methodName,
+                        ReturnType = returnTypeName,
+                    };
+                }
                 else
                 {
                     return new MemberPointcutSyntax
                     {
                         Visibility = visibility,
                         Scope = memberScope,
-                        Type = TypeNameSyntax.Create(memberTypeParts)
+                        DeclaredType = TypeNameSyntax.Create(returnTypeParts)
                     };
                 }
-
             }
         }
 
@@ -177,7 +194,7 @@ namespace AspectSharp.Core.Language
             return TypeNameSyntax.Create(ParseQualifiedName());
         }
 
-        private void Lex()
+        private void Lex(bool skipeWhite = true)
         {
             var tokenList = new List<SyntaxToken>();
 
@@ -185,7 +202,7 @@ namespace AspectSharp.Core.Language
             {
                 if (token?.TokenKind == SyntaxTokenKind.EndOfText) break;
 
-                if (token.TokenKind == SyntaxTokenKind.White) continue;
+                if (skipeWhite && token.TokenKind == SyntaxTokenKind.White) continue;
 
                 tokenList.Add(token);
             }
@@ -195,6 +212,8 @@ namespace AspectSharp.Core.Language
 
         private MemberVisibility ParseVisibility()
         {
+            EatWhiteTokens();
+
             var token = CurrentToken;
             CheckToken(token);
 
@@ -203,7 +222,7 @@ namespace AspectSharp.Core.Language
             switch (token.TokenKind)
             {
                 case SyntaxTokenKind.Times:
-                    if (PeekToken(1)?.TokenKind == SyntaxTokenKind.Dot) return MemberVisibility.Public;
+                    if (PeekToken(1)?.TokenKind != SyntaxTokenKind.White) return MemberVisibility.Public;
                     visibility = MemberVisibility.Any;
                     break;
                 case SyntaxTokenKind.None:
@@ -228,20 +247,31 @@ namespace AspectSharp.Core.Language
 
             if (visibility == MemberVisibility.Protected)
             {
-                var nextToken = PeekToken(1);
-                if (nextToken?.TokenKind == SyntaxTokenKind.Internal)
+                AdvanceToken(1);
+                var whiteTokens = EatWhiteTokens();
+                
+                if (ProbeToken(SyntaxTokenKind.Internal))
                 {
-                    AdvanceToken(2);
-                    return MemberVisibility.ProtectedInternal;
+                    AdvanceToken(1);
+                    visibility = MemberVisibility.ProtectedInternal;
+                }
+                else
+                {
+                    AdvanceToken(-whiteTokens);
                 }
             }
+            else
+            {
+                AdvanceToken(1);
+            }
 
-            AdvanceToken(1);
             return visibility;
         }
 
         private MemberScope ParseMemberScope()
         {
+            EatWhiteTokens();
+
             var token = CurrentToken;
             CheckToken(token);
 
@@ -316,41 +346,55 @@ namespace AspectSharp.Core.Language
 
         private IReadOnlyCollection<IdentifierNameSyntax> ParseQualifiedName()
         {
-            var identifierName = ParseIdentifierName();
+            EatWhiteTokens();
 
-            if (identifierName == null) return QualifiedNameSyntax.None;
-
-            var names = new List<IdentifierNameSyntax>(QualifiedNameSyntax.QualifiedNameDepth);
-
-            while (true)
+            try
             {
-                names.Add(identifierName);
+                var identifierName = ParseIdentifierName();
 
-                if (EatToken(SyntaxTokenKind.Dot))
+                if (identifierName == null) return QualifiedNameSyntax.None;
+
+                var names = new List<IdentifierNameSyntax>(QualifiedNameSyntax.QualifiedNameDepth);
+
+                while (true)
                 {
-                    identifierName = ParseIdentifierName();
-                    if (identifierName != null) continue;
-                    AdvanceToken(-1);
-                }
-                
-                break;
-            }
+                    names.Add(identifierName);
 
-            return names;
+                    if (EatToken(SyntaxTokenKind.Dot))
+                    {
+                        identifierName = ParseIdentifierName();
+                        if (identifierName != null) continue;
+                        AdvanceToken(-1);
+                    }
+
+                    break;
+                }
+
+                return names;
+            }
+            finally
+            {
+                EatWhiteTokens();
+            }
         }
 
         private ParameterListSyntax ParseParameterList()
         {
+            EatWhiteTokens();
+
             var token = CurrentToken;
             CheckToken(token, new[] { SyntaxTokenKind.LeftP });
 
             if (EatToken(SyntaxTokenKind.LeftP))
             {
+                EatWhiteTokens();
                 if (EatToken(SyntaxTokenKind.RightP)) return ParameterListSyntax.Empty;
                 if (EatToken(SyntaxTokenKind.Dot))
                 {
+                    EatWhiteTokens();
                     if (EatToken(SyntaxTokenKind.Dot))
                     {
+                        EatWhiteTokens();
                         if (EatToken(SyntaxTokenKind.RightP)) return ParameterListSyntax.Any;
                         throw new Exception($"Expected {SyntaxTokenKind.RightP} token");
                     }
@@ -362,11 +406,13 @@ namespace AspectSharp.Core.Language
 
                 var parameterList = new List<ParameterSyntax>();
 
-                do
+                while(true)
                 {
+                    EatWhiteTokens();
                     if (TryParseParameterModifier(CurrentToken, out ParameterModifier? parameterModifier))
                     {
                         AdvanceToken(1);
+                        EatWhiteTokens();
                     }
 
                     var typeName = ParseTypeName();
@@ -381,7 +427,7 @@ namespace AspectSharp.Core.Language
                     {
                         continue;
                     }
-                } while (true);
+                } 
 
                 return new ParameterListSyntax(parameterList);
             }

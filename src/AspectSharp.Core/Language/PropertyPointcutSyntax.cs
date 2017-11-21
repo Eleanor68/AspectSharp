@@ -4,7 +4,7 @@
     {
         public IdentifierNameSyntax Name { get; set; }
 
-        public TypeNameSyntax DeclaredType { get; set; }
+        public TypeNameSyntax PropertyType { get; set; }
 
         public bool IsGet { get; set; } = true;
 

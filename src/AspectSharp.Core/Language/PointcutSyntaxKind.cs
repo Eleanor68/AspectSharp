@@ -8,5 +8,6 @@
         Property,
         GetProperty,
         SetProperty,
+        Method,
     }
 }

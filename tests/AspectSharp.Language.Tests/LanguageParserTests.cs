@@ -55,9 +55,9 @@ namespace AspectSharp.Language.Tests
             var constructorPointcut = Assert.IsType<ConstructorPointcutSyntax>(pointcut);
 
             Assert.NotNull(constructorPointcut);
-            Assert.NotNull(constructorPointcut.Type);
-            Assert.Equal(matchType, constructorPointcut.Type.TypeName.MatchType);
-            Assert.Equal(name, constructorPointcut.Type.TypeName.Name);
+            Assert.NotNull(constructorPointcut.DeclaredType);
+            Assert.Equal(matchType, constructorPointcut.DeclaredType.TypeName.MatchType);
+            Assert.Equal(name, constructorPointcut.DeclaredType.TypeName.Name);
         }
 
         [Theory]
@@ -73,10 +73,10 @@ namespace AspectSharp.Language.Tests
             var constructorPointcut = Assert.IsType<ConstructorPointcutSyntax>(pointcut);
 
             Assert.NotNull(constructorPointcut);
-            Assert.NotNull(constructorPointcut.Type);
+            Assert.NotNull(constructorPointcut.DeclaredType);
             Assert.NotNull(constructorPointcut.Parameters);
-            Assert.Equal(matchType, constructorPointcut.Type.TypeName.MatchType);
-            Assert.Equal(name, constructorPointcut.Type.TypeName.Name);
+            Assert.Equal(matchType, constructorPointcut.DeclaredType.TypeName.MatchType);
+            Assert.Equal(name, constructorPointcut.DeclaredType.TypeName.Name);
             Assert.Same(ParameterListSyntax.Any, constructorPointcut.Parameters);
         }
 
@@ -104,7 +104,7 @@ namespace AspectSharp.Language.Tests
             var constructorPointcut = Assert.IsType<ConstructorPointcutSyntax>(pointcut);
 
             Assert.NotNull(constructorPointcut);
-            Assert.NotNull(constructorPointcut.Type);
+            Assert.NotNull(constructorPointcut.DeclaredType);
             Assert.NotNull(constructorPointcut.Parameters);
             Assert.Equal(parameters.Length, constructorPointcut.Parameters.Count);
 
@@ -116,8 +116,7 @@ namespace AspectSharp.Language.Tests
         }
 
         [Theory]
-        //[InlineData("*Property.property", MemberVisibility.Public, "*.*", "*.*", "*Property", true, true)] 
-        //we can not detect if the * from `*Property` is related to visibility or to name because we ignore whitespaces
+        [InlineData("*Property.property", MemberVisibility.Public, "*", "*", "*Property", true, true)] 
         [InlineData("*.property", MemberVisibility.Public, "*", "*", "*", true, true)] //a kind of shortcut, allowed by language because of precedence of '.'
         [InlineData("*.*Property.property", MemberVisibility.Public, "*", "*", "*Property", true, true)]
         [InlineData("*.*.get", MemberVisibility.Public, "*", "*", "*", true, false)]
@@ -138,25 +137,54 @@ namespace AspectSharp.Language.Tests
         [InlineData("- Namespace.SubNamespace.Class.GetProperty.get", MemberVisibility.Private, "*", "Namespace.SubNamespace.Class", "GetProperty", true, false)]
         [InlineData("- Namespace.SubNamespace.Class.SetProperty.set", MemberVisibility.Private, "*", "Namespace.SubNamespace.Class", "SetProperty", false, true)]
         [InlineData("- Namespace.SubNamespace.Class.Property.property", MemberVisibility.Private, "*", "Namespace.SubNamespace.Class", "Property", true, true)]
-
         public void CheckProperty(string pointcutDef, MemberVisibility visibility, string propertyType, string definedType, string propertyName, bool isGet, bool isSet)
         {
             var pointcut = ParseMember(pointcutDef);
             var propertyPointcut = Assert.IsType<PropertyPointcutSyntax>(pointcut);
 
             Assert.NotNull(propertyPointcut);
-            Assert.NotNull(propertyPointcut.Type);
+            Assert.NotNull(propertyPointcut.PropertyType);
             Assert.NotNull(propertyPointcut.DeclaredType);
             Assert.NotNull(propertyPointcut.Name);
 
             Assert.Equal(visibility, propertyPointcut.Visibility);
-            Assert.Equal(propertyType, propertyPointcut.Type.ToString());
+            Assert.Equal(propertyType, propertyPointcut.PropertyType.ToString());
             Assert.Equal(definedType, propertyPointcut.DeclaredType.ToString());
             Assert.Equal(propertyName, propertyPointcut.Name.ToString());
             Assert.Equal(isGet, propertyPointcut.IsGet);
             Assert.Equal(isSet, propertyPointcut.IsSet);
         }
 
+        [Theory]
+        [InlineData("* *.*()", MemberVisibility.Any, MemberScope.Any, "*", "*", "*")]
+        [InlineData("* *.*.*()", MemberVisibility.Any, MemberScope.Any, "*", "*.*", "*")]
+        [InlineData("* * *.*()", MemberVisibility.Any, MemberScope.Any, "*", "*", "*")]
+        [InlineData("* * *.*.*()", MemberVisibility.Any, MemberScope.Any, "*", "*.*", "*")]
+        [InlineData("+ static * *.*()", MemberVisibility.Public, MemberScope.Static, "*", "*", "*")]
+        [InlineData("+ instance * *.*()", MemberVisibility.Public, MemberScope.Instance, "*", "*", "*")]
+        [InlineData("+ int *.*()", MemberVisibility.Public, MemberScope.Any, "int", "*", "*")]
+        [InlineData("+ int *.Method()", MemberVisibility.Public, MemberScope.Any, "int", "*", "Method")]
+        [InlineData("- Namespace.Class.Method()", MemberVisibility.Private, MemberScope.Any, "*", "Namespace.Class", "Method")]
+        [InlineData("- Namespace1.Namespace2.Class.Method()", MemberVisibility.Private, MemberScope.Any, "*", "Namespace1.Namespace2.Class", "Method")]
+        [InlineData("Namespace.Class.Method()", MemberVisibility.Public, MemberScope.Any, "*", "Namespace.Class", "Method")]
+        [InlineData("Namespace1.Namespace2.Class.Method()", MemberVisibility.Public, MemberScope.Any, "*", "Namespace1.Namespace2.Class", "Method")]
+        [InlineData("*Method()", MemberVisibility.Public, MemberScope.Any, "*", "*", "*Method")]//a kind of shortcut, allowed by language because of precedence of '.'
+        public void CheckMethod(string pointcutDef, MemberVisibility visibility, MemberScope memberScope, string returnType, string definedType, string methodName)
+        {
+            var pointcut = ParseMember(pointcutDef);
+            var methodPointcut = Assert.IsType<MethodPointcutSyntax>(pointcut);
+
+            Assert.NotNull(methodPointcut);
+            Assert.NotNull(methodPointcut.MethodName);
+            Assert.NotNull(methodPointcut.DeclaredType);
+            Assert.NotNull(methodPointcut.ReturnType);
+
+            Assert.Equal(visibility, methodPointcut.Visibility);
+            Assert.Equal(memberScope, methodPointcut.Scope);
+            Assert.Equal(returnType, methodPointcut.ReturnType.ToString());
+            Assert.Equal(definedType, methodPointcut.DeclaredType.ToString());
+            Assert.Equal(methodName, methodPointcut.MethodName.ToString());
+        }
 
         private static MemberPointcutSyntax ParseMember(string pointcutDef)
         {
