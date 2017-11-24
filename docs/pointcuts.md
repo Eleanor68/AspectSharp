@@ -146,17 +146,7 @@ ___
 
 ## Conflicts
 
-Conflict 1: Constructor vs Method
-
-* `public Namespace1.Namespace2.Class()`
-* `public Namespace1.Namespace2.Class.Method()`
-
-Solution 1: Introduce class closure
-
-* `public class(Namespace1.Namespace2.Class)()`
-* `public class(Namespace1.Namespace2.Class).Method(..)`
-
-Solution 2: Allow only constructor definitions based on ('.' 'new') ending. IMHO we will loose constructor def elegance.
+None
 
 ___
 
