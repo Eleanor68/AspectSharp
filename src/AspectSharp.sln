@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2005
+VisualStudioVersion = 15.0.27004.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AspectSharp.Language", "AspectSharp.Language\AspectSharp.Language.fsproj", "{90D25268-6019-45C0-8542-81F2F3A412E3}"
 EndProject
@@ -13,8 +13,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectSharp.Core", "AspectS
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{99EAF375-6677-4EDC-AD46-C2EC3F6CC703}"
 	ProjectSection(SolutionItems) = preProject
+		..\docs\compile-time-weaving.md = ..\docs\compile-time-weaving.md
 		..\docs\pointcuts.md = ..\docs\pointcuts.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectSharp.Build.TestSample", "..\tests\AspectSharp.Build.TestSample\AspectSharp.Build.TestSample.csproj", "{10ED38B4-27E9-40A0-BAE1-9FF9C8933176}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,12 +36,17 @@ Global
 		{3B0B2F14-D00C-4569-B390-DD2B5FC1F551}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B0B2F14-D00C-4569-B390-DD2B5FC1F551}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B0B2F14-D00C-4569-B390-DD2B5FC1F551}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10ED38B4-27E9-40A0-BAE1-9FF9C8933176}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10ED38B4-27E9-40A0-BAE1-9FF9C8933176}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10ED38B4-27E9-40A0-BAE1-9FF9C8933176}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10ED38B4-27E9-40A0-BAE1-9FF9C8933176}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{FC4929C5-2E9B-49FE-8131-605121A5AEBB} = {B047766D-D7D6-4B07-A222-D7BCF5AC293B}
+		{10ED38B4-27E9-40A0-BAE1-9FF9C8933176} = {B047766D-D7D6-4B07-A222-D7BCF5AC293B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {193429E8-8CDD-456C-8418-DC0DD0B5A3CE}

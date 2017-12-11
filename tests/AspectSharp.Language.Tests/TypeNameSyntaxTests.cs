@@ -1,4 +1,5 @@
-﻿using AspectSharp.Core.Language;
+﻿using AspectSharp.Core;
+using AspectSharp.Core.Language;
 using System;
 using System.Collections.Generic;
 using Xunit;
@@ -68,6 +69,8 @@ namespace AspectSharp.Language.Tests
             Assert.Same(TypeNameSyntax.None, TypeNameSyntax.Create(QualifiedNameSyntax.None, IdentifierNameSyntax.Any));
 
             Assert.NotSame(TypeNameSyntax.None, TypeNameSyntax.Create(new[] { IdentifierNameSyntax.Create("int") }));
+
+            JoinPointEntryFactory.CreateMethod("Namespace", "Class", "Method")
         }
     }
 }

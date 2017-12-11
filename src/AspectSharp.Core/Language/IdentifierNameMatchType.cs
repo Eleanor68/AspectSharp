@@ -6,6 +6,7 @@
         Strict,
         StartsWith,
         EndsWith,
-        Contains
+        Contains,
+        Not // - new feature `public !void Namespace.Class.*(..)`
     }
 }

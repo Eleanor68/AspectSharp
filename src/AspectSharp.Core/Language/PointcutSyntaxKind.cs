@@ -2,7 +2,6 @@
 {
     public enum PointcutSyntaxKind
     {
-        Any,
         Member,
         Constructor,
         Property,

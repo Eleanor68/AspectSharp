@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net45</TargetFramework>
+    <RootNamespace>AspectSharp.Build.TestSample</RootNamespace>
+    <AssemblyName>AspectSharp.Build.TestSample</AssemblyName>
+    <OutputType>Library</OutputType>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AspectSharp.Core\AspectSharp.Core.csproj" />
+  </ItemGroup>
+
+</Project>
