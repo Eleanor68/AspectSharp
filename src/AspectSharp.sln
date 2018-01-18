@@ -1,19 +1,33 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2005
+VisualStudioVersion = 15.0.27130.2024
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "AspectSharp.Language", "AspectSharp.Language\AspectSharp.Language.fsproj", "{90D25268-6019-45C0-8542-81F2F3A412E3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{B047766D-D7D6-4B07-A222-D7BCF5AC293B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectSharp.Language.Tests", "..\tests\AspectSharp.Language.Tests\AspectSharp.Language.Tests.csproj", "{FC4929C5-2E9B-49FE-8131-605121A5AEBB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectSharp.Language.Tests", "..\tests\AspectSharp.Language.Tests\AspectSharp.Language.Tests.csproj", "{FC4929C5-2E9B-49FE-8131-605121A5AEBB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectSharp.Core", "AspectSharp.Core\AspectSharp.Core.csproj", "{3B0B2F14-D00C-4569-B390-DD2B5FC1F551}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{99EAF375-6677-4EDC-AD46-C2EC3F6CC703}"
 	ProjectSection(SolutionItems) = preProject
 		..\docs\pointcuts.md = ..\docs\pointcuts.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectSharp.Build", "AspectSharp.Build\AspectSharp.Build.csproj", "{B379551A-0463-4873-995E-66EBBD87303B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3B0B2F14-D00C-4569-B390-DD2B5FC1F551} = {3B0B2F14-D00C-4569-B390-DD2B5FC1F551}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectSharp.Build.UnitTests", "..\tests\AspectSharp.Build.UnitTests\AspectSharp.Build.UnitTests.csproj", "{0895D0F4-6AED-46C1-8398-555AB1240EAA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspectSharp.Build.Tests", "..\tests\AspectSharp.Build.Tests\AspectSharp.Build.Tests.csproj", "{D8198399-5C52-4BF4-A3A2-A678CFFF8EC0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2F7BDA17-BEC7-45EA-B731-ADE1581759FA}"
+	ProjectSection(SolutionItems) = preProject
+		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
 Global
@@ -33,12 +47,26 @@ Global
 		{3B0B2F14-D00C-4569-B390-DD2B5FC1F551}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B0B2F14-D00C-4569-B390-DD2B5FC1F551}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B0B2F14-D00C-4569-B390-DD2B5FC1F551}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B379551A-0463-4873-995E-66EBBD87303B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B379551A-0463-4873-995E-66EBBD87303B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B379551A-0463-4873-995E-66EBBD87303B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B379551A-0463-4873-995E-66EBBD87303B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0895D0F4-6AED-46C1-8398-555AB1240EAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0895D0F4-6AED-46C1-8398-555AB1240EAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0895D0F4-6AED-46C1-8398-555AB1240EAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0895D0F4-6AED-46C1-8398-555AB1240EAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8198399-5C52-4BF4-A3A2-A678CFFF8EC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8198399-5C52-4BF4-A3A2-A678CFFF8EC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8198399-5C52-4BF4-A3A2-A678CFFF8EC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8198399-5C52-4BF4-A3A2-A678CFFF8EC0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{FC4929C5-2E9B-49FE-8131-605121A5AEBB} = {B047766D-D7D6-4B07-A222-D7BCF5AC293B}
+		{0895D0F4-6AED-46C1-8398-555AB1240EAA} = {B047766D-D7D6-4B07-A222-D7BCF5AC293B}
+		{D8198399-5C52-4BF4-A3A2-A678CFFF8EC0} = {B047766D-D7D6-4B07-A222-D7BCF5AC293B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {193429E8-8CDD-456C-8418-DC0DD0B5A3CE}
