@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <UseHostCompilerIfAvailable>False</UseHostCompilerIfAvailable>
+    <TargetFrameworks>net46</TargetFrameworks>
+    <RootNamespace>AspectSharp.Build.Tests</RootNamespace>
+    <AssemblyName>AspectSharp.Build.Tests</AssemblyName>
+    <OutputType>Library</OutputType>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseHostCompilerIfAvailable>false</UseHostCompilerIfAvailable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.Build.Framework" />
+  </ItemGroup>
+
+  <Import Project="..\build\AspectSharp.targets" />
+  
+</Project>

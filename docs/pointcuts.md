@@ -262,26 +262,3 @@ public class Aspect
     }
 }
 ```
-
-#### Extend instance class
-
-``` C#
-public class Class
-{
-    public int Property { get; set; }
-}
-
-[Extend("Namespace.Class")]
-public class ClassExtension
-{
-    public int NewProperty { get; set; }
-
-    public void NewMethod () { }
-}
-
-//somewhere in the source code
-var c = new Class();
-c.Property = 0;
-c.NewProperty = 0;
-c.NewMethod();
-```

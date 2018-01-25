@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net46;netstandard1.6</TargetFrameworks>
+    <RootNamespace>AspectSharp.Build</RootNamespace>
+    <AssemblyName>AspectSharp.Build</AssemblyName>
+    <OutputType>Library</OutputType>
+    <TestsPath>$(MSBuildProjectDirectory)\..\..\tests</TestsPath>
+    <TestsBuildPath>$(TestsPath)\build</TestsBuildPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <WarningsAsErrors>NU1605</WarningsAsErrors>
+    <NoWarn>1701;1702;1705;MSB3021;MSB3061</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Build.Framework" Version="15.5.180" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.5.180" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="2.6.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AspectSharp.Core\AspectSharp.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="AspectSharp.targets">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="CopyToTests" AfterTargets="AfterBuild" Condition="Exists($(TestsPath))">
+    <ItemGroup>
+      <OutputFiles Include="$(TargetDir)*.*" />
+    </ItemGroup>
+    <MakeDir Directories="$(TestsBuildPath)" />
+    <Copy SourceFiles="@(OutputFiles)" DestinationFolder="$(TestsBuildPath)" ContinueOnError="true" SkipUnchangedFiles="true" Retries="0" RetryDelayMilliseconds="0" />
+  </Target>
+
+  <Target Name="CleanTests" AfterTargets="BeforeClean" Condition="Exists($(TestsPath))">
+    <ItemGroup>
+      <DeletedFiles Include="$(TestsBuildPath)\*.*" />
+    </ItemGroup>
+    <Delete Files="@(DeletedFiles)" ContinueOnError="true" />
+  </Target>
+
+</Project>
+

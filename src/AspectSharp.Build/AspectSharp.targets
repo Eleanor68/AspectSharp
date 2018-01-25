@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <AspectSharpPath Condition="'$(AspectSharpPath)' == ''">$(MSBuildThisFileDirectory)</AspectSharpPath>
+    <AspectSharpBuildAssemblyName>AspectSharp.Build.dll</AspectSharpBuildAssemblyName>
+    <AspectSharpBuildAssemblyPath>$(AspectSharpPath)$(AspectSharpBuildAssemblyName)</AspectSharpBuildAssemblyPath>
+  </PropertyGroup>
+
+  <Target Name="EnsureAspectSharpDependencies" BeforeTargets="ResolveProjectReferences">
+    <Message Text="AspectSharp dependecies ok ..." Importance="high"/>
+    <Error Text="The $(AspectSharpBuildAssemblyName) could not be found at $(AspectSharpPath)" Condition="!Exists($(AspectSharpBuildAssemblyPath))"/>
+    <PropertyGroup>
+      <CoreCompileDependsOn>
+        $(CoreCompileDependsOn);
+        AspectSharpLocateExtensions
+      </CoreCompileDependsOn>
+    </PropertyGroup>
+  </Target>
+
+  <UsingTask TaskName="AspectSharp.Build.LocateExtensions" AssemblyFile="$(AspectSharpBuildAssemblyPath)"/>
+
+  <Target Name="AspectSharpLocateExtensions" DependsOnTargets="EnsureAspectSharpDependencies">
+
+    <!--<CombinePath BasePath="$(MSBuildProjectDirectory)" Paths="$(IntermediateOutputPath)" Condition="'$(AspectSharpIntermediateOutputPath)' == ''">
+      <Output TaskParameter="CombinedPaths" PropertyName="AspectSharpIntermediateOutputPath"/>
+    </CombinePath>-->
+
+    <PropertyGroup>
+      <AspectSharpIntermediateOutputPath Condition="'$(AspectSharpIntermediateOutputPath)' == ''">$(IntermediateOutputPath)</AspectSharpIntermediateOutputPath>
+    </PropertyGroup>
+    
+    <!--<Message Text="Locate extension points from sources '@(Compile)'" Importance="high"/>-->
+
+    <AspectSharp.Build.LocateExtensions
+      AssemblyName="$(AssemblyName)"
+      Files="@(Compile)"
+      IntermediateOutputPath="$(AspectSharpIntermediateOutputPath)"
+      DesignTimeBuild="$(DesignTimeBuild)">
+      <Output TaskParameter="GeneratedFiles" PropertyName="GeneratedFiles"/>
+      <Output TaskParameter="RemoveFiles" PropertyName="RemoveFiles"/>
+    </AspectSharp.Build.LocateExtensions>
+
+    <ItemGroup>
+      <Compile Include="$(GeneratedFiles)"/>
+      <Compile Remove="$(RemoveFiles)"/>
+      <FileWrites Include="@(GeneratedFiles)" />
+    </ItemGroup>
+
+    <!--<Message Text="New files to compile '@(Compile)'" Importance="high"/>-->
+
+  </Target>
+
+</Project>
