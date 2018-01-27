@@ -1,22 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net46</TargetFrameworks>
+    <TargetFramework Condition="'$(OSPlatform)' == 'Windows'">net46</TargetFramework>
+    <TargetFramework Condition="'$(OSPlatform)' != 'Windows'">netcoreapp2.0</TargetFramework>
     <RootNamespace>AspectSharp.Language.Tests</RootNamespace>
     <AssemblyName>AspectSharp.Language.Tests</AssemblyName>
     <OutputType>Library</OutputType>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net46|AnyCPU'">
-    <LangVersion>7.2</LangVersion>
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="System.ValueTuple" Version="4.4.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net46'">
     <PackageReference Include="xunit" Version="2.1.0" />
     <PackageReference Include="xunit.core" Version="2.1.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
+    <!-- We need different versions because VS does not see tests built with version > 2.1.0 -->
+    <PackageReference Include="xunit" Version="2.3.1" />
+    <PackageReference Include="xunit.core" Version="2.3.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
   </ItemGroup>
 
   <ItemGroup>

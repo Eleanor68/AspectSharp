@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net46;netstandard1.6</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">net46;netstandard1.6</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netstandard1.6</TargetFrameworks>
     <RootNamespace>AspectSharp.Build</RootNamespace>
     <AssemblyName>AspectSharp.Build</AssemblyName>
     <OutputType>Library</OutputType>

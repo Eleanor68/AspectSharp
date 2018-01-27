@@ -70,7 +70,7 @@ namespace AspectSharp.Language.Tests
 
             Assert.NotSame(TypeNameSyntax.None, TypeNameSyntax.Create(new[] { IdentifierNameSyntax.Create("int") }));
 
-            JoinPointEntryFactory.CreateMethod("Namespace", "Class", "Method")
+            //JoinPointEntryFactory.CreateMethod("Namespace", "Class", "Method");
         }
     }
 }
