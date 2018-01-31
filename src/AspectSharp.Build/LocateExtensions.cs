@@ -40,7 +40,6 @@ namespace AspectSharp.Build
         /// 2. Generate only methods/properties stubs otherwise we will break the IntelliSense
         /// 3. Stubs should be generated only with empty body
         /// </remarks>
-        [Required]
         public bool DesignTimeBuild { get; set; }
 
         [Output]

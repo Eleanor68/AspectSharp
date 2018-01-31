@@ -177,8 +177,11 @@ namespace AspectSharp.Core
 
     public interface IMemberDefinition
     {
-        MemberDefinitionType MemberType { get; }
+        string Name { get; set; }
 
+        string Namespace { get; set; }
+        
+        MemberDefinitionType MemberType { get; }
     }
 
     public interface IMethodDefinition : IMemberDefinition
@@ -187,6 +190,10 @@ namespace AspectSharp.Core
 
     public class MethodDefinition : IMethodDefinition
     {
+        public string Name { get; set; }
+
+        public string Namespace { get; set; }
+
         public MemberDefinitionType MemberType => MemberDefinitionType.Method;
     }
 
@@ -206,9 +213,14 @@ namespace AspectSharp.Core
         }
     }
 
-    public interface IPointcutExpressionMatch
+    public interface IPointcutExpressionMatch : IPointcutExpressionMatch<IMemberDefinition>
     {
-        bool IsMatch(IMemberDefinition memberDefinition);
+        
+    }
+
+    public interface IPointcutExpressionMatch<M> where M : IMemberDefinition
+    {
+        bool IsMatch(M memberDefinition);
     }
 
     public class PointcutExpressionMatch : IPointcutExpressionMatch
@@ -238,19 +250,21 @@ namespace AspectSharp.Core
         public bool IsMatch(IMemberDefinition memberDefinition) => left.IsMatch(memberDefinition) && right.IsMatch(memberDefinition);
     }
 
-    public sealed class MethodPointcutMatch : IPointcutExpressionMatch
+    public sealed class MethodPointcutMatch : IPointcutExpressionMatch<MethodDefinition>
     {
+        private readonly MethodPointcutSyntax methodPointcutSyntax;
+
         public MethodPointcutMatch(MethodPointcutSyntax methodPointcutSyntax)
         {
-
+            if (methodPointcutSyntax == null) throw new ArgumentNullException(nameof(methodPointcutSyntax));
+            this.methodPointcutSyntax = methodPointcutSyntax;
         }
 
-        public bool IsMatch(IMemberDefinition memberDefinition)
+        public bool IsMatch(MethodDefinition methodDefinition)
         {
-            if (memberDefinition.MemberType == MemberDefinitionType.Method)
-            {
-                var methodDef = memberDefinition as IMethodDefinition;
-            }
+            if (methodDefinition == null) return false;
+
+            
 
             return false;
         }
